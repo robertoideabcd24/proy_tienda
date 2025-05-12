@@ -1,8 +1,12 @@
-{% extends "base.html" %}
+{% extends "admin/base_admin.html" %}
 
 {% block title %}Insertar Producto{% endblock %}
 
 {% block content %}
+<div class="regresar-btn">
+        <a href="{{ url_for('menu_admin') }}" class="btn-regresar">Regresar al menu principal</a>
+    </div>
+
 <div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
     <form method="POST" action="{{ url_for('insertar_producto') }}" style="border: 1px solid #ccc; padding: 30px; border-radius: 10px; background-color: #f9f9f9; width: 300px;">
         <h2 style="text-align: center;">Nuevo Producto</h2>

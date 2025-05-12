@@ -128,8 +128,14 @@ def registrar_rutas(app):
 
             exito = Producto.insertar_detalle_producto(producto_id, talla, color, stock)
             if exito:
-                return redirect(url_for('consulta_productos'))
+                # Si la inserción fue exitosa, recargamos la misma página
+                return redirect(url_for('insertar_detalles_producto', producto_id=producto_id))
             else:
                 return "Error al insertar detalles del producto", 500
 
-        return render_template('admin/insertar_prod_det_admin.html', producto_id=producto_id)
+        producto = Producto.obtener_producto_por_id(producto_id)
+        if not producto:
+            return "Producto no encontrado", 404
+
+        producto_detalles = Producto.obtener_detalles_por_id(producto_id)  # Obtener los detalles adicionales si existen
+        return render_template('admin/insertar_prod_det_admin.html', producto_id=producto_id, producto_nombre=producto['nombre'], producto_detalles=producto_detalles)

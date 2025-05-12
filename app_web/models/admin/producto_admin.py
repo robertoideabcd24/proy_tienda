@@ -106,6 +106,24 @@ class Producto:
             print("Error al insertar detalle del producto:", e)
             return False
 
-
+    @staticmethod
+    def obtener_detalles_por_id(producto_id):
+        # Consulta SQL para obtener todos los detalles del producto
+        query = """
+        SELECT talla, color, stock
+        FROM producto_detalles
+        WHERE producto_id = %s
+        """
+        try:
+            # Obtén el cursor de la conexión gestionada por el pool
+            with pgdb.get_cursor() as cursor:
+                cursor.execute(query, (producto_id,))
+                detalles = cursor.fetchall()  # Devuelve todos los registros
+                
+            # Si no hay detalles, retorna None
+            return detalles if detalles else None
+        except Exception as e:
+            print("Error al obtener detalles del producto:", e)
+            return None
 
 #Modificar producto
