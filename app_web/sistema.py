@@ -1,6 +1,6 @@
 from flask import Flask, request, redirect, url_for, render_template
 from .extension import pgdb
-from .views import registrar_rutas
+from .views_admin import registrar_rutas
 
 
 def create_app():
