@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuario</title>
+
+    <!-- Bootstrap 3 -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #F3ECEC;
+        }
+
+        .registro-container {
+            max-width: 400px;
+            margin: 80px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            border: 2px solid #7B9FD5;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus {
+            border-color: #7B9FD5;
+            box-shadow: 0 0 5px rgba(123, 159, 213, 0.5);
+        }
+
+        .btn-block {
+            margin-top: 10px;
+        }
+
+        .text-center {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="registro-container">
+        <h3 class="text-center">Registro de Usuario</h3>
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <input type="text" class="form-control" name="nombre" placeholder="Nombre completo" required>
+            </div>
+
+            <div class="form-group">
+                <input type="date" class="form-control" name="fecha_nacimiento" placeholder="Fecha nacimiento" required>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" class="form-control" name="rol" placeholder="Rol" required>
+            </div>
+
+            <div class="form-group">
+                <input type="email" class="form-control" name="correo" placeholder="Correo electrónico" required>
+            </div>
+
+            <div class="form-group">
+                <input type="password" class="form-control" name="contrasena" placeholder="Contraseña" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
