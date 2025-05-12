@@ -22,12 +22,17 @@ class Usuario:
         try:
             with pgdb.get_cursor() as cursor:
                 cursor.execute(
-                    "SELECT nombre_usuario, correo, rol FROM usuarios WHERE nombre_usuario = %s AND contrasena = %s",
+                    "SELECT id, nombre_usuario, correo, rol FROM usuarios WHERE nombre_usuario = %s AND contrasena = %s",
                     (nombre, contrasena)
                 )
                 resultado = cursor.fetchone()
             if resultado:
-                return {'nombre': resultado[0], 'correo': resultado[1], 'rol': resultado[2]}
+                return {
+                    'id': resultado[0],         # id del usuario
+                    'nombre': resultado[1],     # nombre del usuario
+                    'correo': resultado[2],     # correo del usuario
+                    'rol': resultado[3]         # rol del usuario
+                }
         except Exception as e:
             print("Error al verificar usuario:", e)
         return None

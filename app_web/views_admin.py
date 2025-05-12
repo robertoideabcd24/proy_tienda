@@ -18,6 +18,7 @@ def registrar_rutas(app):
                 session['usuario'] = usuario['nombre']
                 session['correo'] = usuario['correo']
                 session['rol'] = usuario['rol']
+                session['usuario_id'] = usuario['id']  # Asegúrate de guardar el ID del usuario
 
                 if usuario['rol'] == 1:
                     return redirect(url_for('menu_admin'))
@@ -28,6 +29,7 @@ def registrar_rutas(app):
             else:
                 return render_template('login.html', error="Credenciales incorrectas"), 401
         return render_template('login.html')
+
 
 
     #roles 
@@ -73,22 +75,27 @@ def registrar_rutas(app):
     @app.route('/perfil_usuario')
     def perfil_usuario():
         if 'usuario' in session:
-            return render_template('perfil.html', usuario=session['usuario'], correo=session['correo'])
+            return render_template('admin/perfil.html', usuario=session['usuario'], correo=session['correo'])
         return redirect(url_for('inicio_sesion'))
     
-    @app.route('/logout')
+    @app.route('/logout', methods=['POST'])
     def logout():
-        session.clear()
+        session.clear()  # Elimina todos los datos de sesión
         return redirect(url_for('login_home'))
+
+
     
     #----------------------------------------
     # Página de la consulta de productos
     #----------------------------------------
     @app.route('/consulta_productos', methods=['GET', 'POST'])
     def consulta_productos():
-            resultados = Producto.consulta_prod()
+        usuario_id = session.get('usuario_id')
+        if usuario_id:
+            resultados = Producto.consulta_prod_por_usuario(usuario_id)
             return render_template("admin/consultar_prod_admin.html", datos=resultados)
-    
+        return redirect(url_for('login_home'))
+
     #----------------------------------------
     # Detalle de la consulta de productos
     #----------------------------------------
@@ -97,7 +104,7 @@ def registrar_rutas(app):
         # Suponiendo que tienes una forma de buscar el producto por ID
         producto = Producto.obtener_producto_por_id(id)  # función que debes definir
         if producto:
-            return render_template('producto.html', producto=producto)
+            return render_template('admin/editar_prod_admin.html', producto=producto)
         else:
             return "Producto no encontrado", 404
 
@@ -112,12 +119,19 @@ def registrar_rutas(app):
             disponible = 'disponible' in request.form
             marca = request.form['marca']
             descripcion = request.form['descripcion']
-            exito = Producto.insertar_producto_en_db(nombre, precio, disponible, marca, descripcion)
+            usuario_id = session.get('usuario_id')  # Aquí obtienes el ID del usuario desde la sesión
+
+            if not usuario_id:  # Si no hay usuario logueado, devolver un error 403
+                return "Usuario no identificado", 403
+
+            exito = Producto.insertar_producto_en_db(nombre, precio, disponible, marca, descripcion, usuario_id)
             if exito:
                 return redirect(url_for('consulta_productos'))
             else:
                 return "Error al insertar producto", 500
         return render_template('admin/insertar_prod_admin.html')
+
+
     
     @app.route('/insertar_detalles_producto/<int:producto_id>', methods=['GET', 'POST'])
     def insertar_detalles_producto(producto_id):

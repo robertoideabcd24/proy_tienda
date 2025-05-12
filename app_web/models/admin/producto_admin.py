@@ -30,11 +30,11 @@ class Producto:
         return pgdb
 
     @staticmethod
-    def consulta_prod():
+    def consulta_prod_por_usuario(usuario_id):
         resultados = []
         try:
             with pgdb.get_cursor() as cursor:
-                cursor.execute("SELECT id, nombre, disponible, precio, marca, descripcion FROM productos")
+                cursor.execute("SELECT id, nombre, disponible, precio, marca, descripcion FROM productos WHERE usuario_id = %s", (usuario_id,))
                 filas = cursor.fetchall()
                 for fila in filas:
                     resultados.append({
@@ -46,9 +46,10 @@ class Producto:
                         'descripcion': fila[5],
                     })
         except Exception as e:
-            print("Error al consultar productos:", e)
+            print("Error al consultar productos del usuario:", e)
 
         return resultados
+
 
     @staticmethod
     def obtener_producto_por_id(id):
@@ -71,16 +72,16 @@ class Producto:
         return None
 
     @staticmethod
-    def insertar_producto_en_db(nombre, precio, disponible, marca, descripcion):
+    def insertar_producto_en_db(nombre, precio, disponible, marca, descripcion, usuario_id):
         try:
             with pgdb.get_cursor() as cursor:
                 cursor.execute(
-                    "INSERT INTO productos (nombre, precio, disponible, marca, descripcion) VALUES (%s, %s, %s, %s, %s) RETURNING id",
-                    (nombre, float(precio), disponible, marca, descripcion)
+                    "INSERT INTO productos (nombre, precio, disponible, marca, descripcion, usuario_id) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
+                    (nombre, float(precio), disponible, marca, descripcion, usuario_id)
                 )
                 producto_id = cursor.fetchone()[0]
                 cursor.connection.commit()
-                return producto_id  # ← Importante: retornamos el ID
+                return producto_id
         except ValueError as ve:
             print("Error de valor (conversión de tipos):", ve)
             return None
@@ -90,6 +91,7 @@ class Producto:
         except Exception as e:
             print("Error general al insertar producto:", e)
             return None
+
 
 
     @staticmethod
