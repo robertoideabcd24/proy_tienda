@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Consulta de Productos{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta</title>
+    <style>
+        /* Contenedor principal que utiliza CSS Grid */
+        .productos {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 4 productos por fila */
+            gap: 20px; /* Espacio entre los bloques */
+            padding: 20px;
+        }
+
+        /* Cada bloque de producto */
+        .producto {
+            border: 1px solid #ccc; /* Borde gris claro */
+            padding: 10px;
+            background-color: #f9f9f9;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        /* Estilo para los títulos dentro del bloque */
+        .producto h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .producto p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Responsividad: cuando la pantalla es más pequeña (móvil) */
+        @media (max-width: 768px) {
+            .productos {
+                grid-template-columns: repeat(1, 1fr); /* 2 productos por fila */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .productos {
+                grid-template-columns: 1fr; /* 1 producto por fila */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Productos</h1>
+    
+    <div class="productos">
+        {% for producto in datos %}
+            <a href="{{ url_for('ver_producto', id=producto.id) }}" style="text-decoration: none; color: inherit;">
+                <div class="producto">
+                    <h2>{{ producto.nombre }}</h2>  
+                    <p>ID: {{ producto.id }}</p>
+                    <p>Disponible: {{ producto.disponible }}</p>
+                    <p>Precio: {{ producto.precio }}</p>
+                    <p>Marca: {{ producto.marca }}</p>
+                    <p>Descripcion: {{ producto.descripcion }}</p>
+                </div>
+            </a>
+        {% endfor %}
+    </div>    
+
+</body>
+{% endblock %}

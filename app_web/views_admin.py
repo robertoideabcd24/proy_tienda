@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, url_for, session
 from .models.admin.usuario_admin import Usuario
+from .models.admin.producto_admin import Producto, AltaProductoException, AltaProductoPrecioException
 
 def registrar_rutas(app):
     #----------------------------------------
@@ -79,3 +80,56 @@ def registrar_rutas(app):
     def logout():
         session.clear()
         return redirect(url_for('login_home'))
+    
+    #----------------------------------------
+    # Página de la consulta de productos
+    #----------------------------------------
+    @app.route('/consulta_productos', methods=['GET', 'POST'])
+    def consulta_productos():
+            resultados = Producto.consulta_prod()
+            return render_template("admin/consultar_prod_admin.html", datos=resultados)
+    
+    #----------------------------------------
+    # Detalle de la consulta de productos
+    #----------------------------------------
+    @app.route('/producto/<int:id>')
+    def ver_producto(id):
+        # Suponiendo que tienes una forma de buscar el producto por ID
+        producto = Producto.obtener_producto_por_id(id)  # función que debes definir
+        if producto:
+            return render_template('producto.html', producto=producto)
+        else:
+            return "Producto no encontrado", 404
+
+    #----------------------------------------
+    # Página para insertar producto
+    #----------------------------------------
+    @app.route('/insertar_producto', methods=['GET', 'POST'])
+    def insertar_producto():
+        if request.method == 'POST':
+            nombre = request.form['nombre']
+            precio = request.form['precio']
+            disponible = 'disponible' in request.form
+            marca = request.form['marca']
+            descripcion = request.form['descripcion']
+            exito = Producto.insertar_producto_en_db(nombre, precio, disponible, marca, descripcion)
+            if exito:
+                return redirect(url_for('consulta_productos'))
+            else:
+                return "Error al insertar producto", 500
+        return render_template('admin/insertar_prod_admin.html')
+    
+    @app.route('/insertar_detalles_producto/<int:producto_id>', methods=['GET', 'POST'])
+    def insertar_detalles_producto(producto_id):
+        if request.method == 'POST':
+            talla = request.form['talla']
+            color = request.form['color']
+            stock = request.form['stock']
+
+            exito = Producto.insertar_detalle_producto(producto_id, talla, color, stock)
+            if exito:
+                return redirect(url_for('consulta_productos'))
+            else:
+                return "Error al insertar detalles del producto", 500
+
+        return render_template('admin/insertar_prod_det_admin.html', producto_id=producto_id)

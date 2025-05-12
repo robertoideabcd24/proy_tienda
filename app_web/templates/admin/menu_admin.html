@@ -6,7 +6,12 @@
     <h1>Menú administrador</h1>
     <table>
         <tr>
-            
+            <p style="color:blue;">
+                <a href="{{ url_for('consulta_productos') }}">Consultar productos</a>
+            </p>
+            <p>
+                <a href="{{ url_for('insertar_producto') }}">Insertar producto</a>
+            </p>
         </tr>
     </table>
 {% endblock %}
