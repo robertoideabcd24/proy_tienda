@@ -58,6 +58,14 @@
     <div class="regresar-btn">
         <a href="{{ url_for('menu_admin') }}" class="btn-regresar">Regresar al menu principal</a>
     </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <h1>Lista de Productos</h1>
     <div class="productos">
         {% for producto in datos %}
