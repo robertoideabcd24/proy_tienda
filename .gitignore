@@ -1,13 +1,13 @@
 # Ignorar cachés de Python
 __pycache__/
 **/__pycache__/
+
+# Ignorar archivo para pruebas de cobertura
 reporte/
+.coverage
+**/.coverage
 
 # Ignorar entorno virtual
 .venv/
-
 .pytest_cache/
 **/.pytest_cache/
-
-.coverage
-**/.coverage

@@ -51,7 +51,7 @@ def test_insertar_producto(setup_db):
     producto_db = Producto.obtener_producto_por_id(4)  # Suponiendo que el ID insertado es 1
     assert producto_db is not None
     assert producto_db['nombre'] == nombre
-    assert producto_db['precio'] == precio  # Comparación entre Decimal y Decimal
+    assert producto_db['precio'] == precio  
     assert producto_db['marca'] == marca
     assert producto_db['descripcion'] == descripcion
 
