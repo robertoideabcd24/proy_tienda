@@ -1,12 +1,30 @@
 from flask import render_template, request, redirect, url_for, session, flash
+from functools import wraps
 from .models.admin.usuario_admin import Usuario, UsuarioException
 from .models.admin.producto_admin import Producto, AltaProductoException, AltaProductoPrecioException, AltaProductoDescripcionException
+
+def rol_requerido(rol_permitido):
+    def decorador(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if 'rol' not in session or session['rol'] != rol_permitido:
+                flash("Acceso no autorizado", "danger")
+                return redirect(url_for('login_home'))
+            return func(*args, **kwargs)
+        return wrapper
+    return decorador
 
 def registrar_rutas(app):
     #----------------------------------------
     # Página de registro al sistema
     #----------------------------------------
     @app.route('/', methods=['GET', 'POST'])
+    @app.route('/consulta_productos', methods=['GET', 'POST'])
+    def consulta_productos():
+            resultados = Producto.consulta_prod()
+            return render_template("consultar_bien.html", datos=resultados)
+
+
     @app.route('/login', methods=['GET', 'POST'])
     def login_home():
         if request.method == 'POST':
@@ -43,6 +61,7 @@ def registrar_rutas(app):
     #----------------------------------------
     #roles 
     @app.route('/menu_admin')
+    @rol_requerido(1)
     def menu_admin():
         if session.get('rol') == 1:
             return render_template('admin/menu_admin.html')
@@ -50,23 +69,14 @@ def registrar_rutas(app):
         return redirect(url_for('login_home'))
 
     @app.route('/menu_usuario')
+    @rol_requerido(2)
     def menu_usuario():
         if session.get('rol') == 2:
-            return render_template('usuario/menu_usuario.html')
+            resultados = Producto.consulta_prod() 
+            return render_template("usuario/consultar_prod_usu.html", datos=resultados)
         flash("Acceso no autorizado", 'danger')
         return redirect(url_for('login_home'))
 
-    #----------------------------------------    
-    # Página  del menu principal
-    #----------------------------------------
-    @app.route('/inicio', methods=['GET', 'POST']) 
-    def inicio_home():
-        try:
-            return render_template('admin/menu_admin.html')
-        except Exception as e:
-            flash(f"Error al cargar el menú: {str(e)}", "danger")
-            return redirect(url_for('login_home'))
-    
     #----------------------------------------
     # Página para insertar usuario
     #----------------------------------------
@@ -122,10 +132,11 @@ def registrar_rutas(app):
 
     
     #----------------------------------------
-    # Página de la consulta de productos
+    # Página de la consulta de stock productos
     #----------------------------------------
-    @app.route('/consulta_productos', methods=['GET', 'POST'])
-    def consulta_productos():
+    @app.route('/consulta_stock', methods=['GET', 'POST'])
+    @rol_requerido(1)
+    def consulta_stock():
         usuario_id = session.get('usuario_id')
         if not usuario_id:
             flash("Debes iniciar sesión para ver tus productos.", "warning")
@@ -142,6 +153,7 @@ def registrar_rutas(app):
     # Detalle de la consulta de productos
     #----------------------------------------
     @app.route('/producto/<int:id>')
+    @rol_requerido(1)
     def ver_producto(id):
         usuario_id = session.get('usuario_id')
         if not usuario_id:
@@ -153,7 +165,7 @@ def registrar_rutas(app):
                 return render_template('admin/editar_prod_admin.html', producto=producto)
             else:
                 flash("Producto no encontrado", "warning")
-                return redirect(url_for('consulta_productos'))
+                return redirect(url_for('consulta_stock'))
         except Exception as e:
             flash(f"Error al obtener el producto: {str(e)}", "danger")
             return redirect(url_for('login_home'))
@@ -162,6 +174,7 @@ def registrar_rutas(app):
     # Página para insertar producto
     #----------------------------------------
     @app.route('/insertar_producto', methods=['GET', 'POST'])
+    @rol_requerido(1)
     def insertar_producto():
         usuario_id = session.get('usuario_id')
         if not usuario_id:
@@ -179,7 +192,7 @@ def registrar_rutas(app):
                 exito = Producto.insertar_producto_en_db(nombre, precio, disponible, marca, descripcion, usuario_id)
                 if exito:
                     flash("Producto insertado exitosamente.", "success")
-                    return redirect(url_for('consulta_productos'))
+                    return redirect(url_for('consulta_stock'))
                 else:
                     flash("Ocurrió un error al insertar el producto.", "danger")
                     return redirect(url_for('insertar_producto'))
@@ -197,6 +210,7 @@ def registrar_rutas(app):
     # Insertar detalles del producto
     #----------------------------------------
     @app.route('/insertar_detalles_producto/<int:producto_id>', methods=['GET', 'POST'])
+    @rol_requerido(1)
     def insertar_detalles_producto(producto_id):
         usuario_id = session.get('usuario_id')
         if not usuario_id:
@@ -219,7 +233,7 @@ def registrar_rutas(app):
             producto = Producto.obtener_producto_por_id(producto_id)
             if not producto:
                 flash("Producto no encontrado", "warning")
-                return redirect(url_for('consulta_productos'))
+                return redirect(url_for('consulta_stock'))
 
             producto_detalles = Producto.obtener_detalles_por_id(producto_id)
             return render_template('admin/insertar_prod_det_admin.html', 
@@ -228,5 +242,10 @@ def registrar_rutas(app):
                                 producto_detalles=producto_detalles)
         except Exception as e:
             flash(f"Ocurrió un error: {str(e)}", "danger")
-            return redirect(url_for('consulta_productos'))
+            return redirect(url_for('consulta_stock'))
 
+     #----------------------------------------
+    # Página de la consulta de productos
+    #----------------------------------------
+    
+    

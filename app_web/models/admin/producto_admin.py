@@ -136,4 +136,26 @@ class Producto:
             print("Error al obtener detalles del producto:", e)
             return None
 
+    @staticmethod
+    def consulta_prod():
+        resultados = []
+        try:
+            with pgdb.get_cursor() as cursor:
+                cursor.execute("SELECT id, nombre, disponible, precio, marca, descripcion FROM productos")
+                filas = cursor.fetchall()
+                for fila in filas:
+                    resultados.append({
+                        'id': fila[0],
+                        'nombre': fila[1],
+                        'disponible': fila[2],
+                        'precio': fila[3],
+                        'marca': fila[4],
+                        'descripcion': fila[5],
+                    })
+        except Exception as e:
+            print("Error al consultar productos:", e)
+
+        return resultados
+
+
 #Modificar producto
