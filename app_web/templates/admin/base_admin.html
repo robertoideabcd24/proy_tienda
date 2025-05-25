@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Tienda Online{% endblock %}</title>
+  <style>
+    /* Estructura base del layout */
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    /* Encabezado */
+    header {
+      background-color: #7B9FD5;
+      color: white;
+      padding: 15px;
+    }
+
+    header h1 {
+      margin: 0;
+      text-align: center;
+    }
+
+    .nav-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      gap: 10px;
+    }
+
+    .nav-container input[type="text"] {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    .nav-container .botones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-left: auto; 
+    }
+
+    .nav-container button {
+      background-color: #ffffff;
+      color: #7B9FD5;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .nav-container button:hover {
+      background-color: #e6e6e6;
+    }
+
+    /* Contenido principal que crece */
+    .content {
+      flex: 1;
+      padding: 20px;
+    }
+
+    /* Pie de página */
+    footer {
+      background-color: #7B9FD5;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+    }
+
+    .social-buttons {
+      margin-top: 10px;
+    }
+
+    .social-buttons a {
+      display: inline-block;
+      margin: 0 10px;
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      padding: 8px;
+      border: 1px solid white;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      line-height: 16px;
+    }
+
+    .social-buttons a:hover {
+      background-color: white;
+      color: #7B9FD5;
+    }
+
+    /* Responsivo */
+    @media (max-width: 600px) {
+      .nav-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .nav-container input,
+      .nav-container .botones {
+        width: 100%;
+      }
+
+      .nav-container .botones {
+        justify-content: center;
+      }
+
+      .social-buttons {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header>
+    <h1>Tienda Online</h1>
+    <div class="nav-container">
+      
+      <div class="botones">
+        
+        <button onclick="window.location.href='/compras'">Ventas</button>
+
+        <button onclick="window.location.href='/carrito'">Proceso</button>
+
+        {% if session.usuario %}
+          <button onclick="window.location.href='/perfil_usuario'">{{ session.usuario }}</button>
+        {% else %}
+          <button onclick="window.location.href='/login'">Iniciar sesión</button>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido -->
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- Pie de página -->
+  <footer>
+    <p>&copy; 2025 Tienda Online</p>
+    <div class="social-buttons">
+      <a href="https://facebook.com" target="_blank">F</a>
+      <a href="https://twitter.com" target="_blank">X</a>
+      <a href="https://instagram.com" target="_blank">I</a>
+    </div>
+  </footer>
+
+</body>
+</html>

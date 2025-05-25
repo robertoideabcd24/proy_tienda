@@ -1,0 +1,91 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Consulta de Productos{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta</title>
+    <style>
+        .productos {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .producto {
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .producto h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .producto p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .acciones {
+            margin-top: 10px;
+        }
+
+        .acciones button {
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .productos {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .productos {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="regresar-btn">
+        <a href="{{ url_for('menu_admin') }}" class="btn-regresar">Regresar al menu principal</a>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h1>Lista de Productos</h1>
+    <div class="productos">
+        {% for producto in datos %}
+            <div class="producto">
+                <h2>{{ producto.nombre }}</h2>  
+                <p>Disponible: {{ producto.disponible }}</p>
+                <p>Precio: {{ producto.precio }}</p>
+                <p>Marca: {{ producto.marca }}</p>
+                <p>Descripcion: {{ producto.descripcion }}</p>
+                
+                <div class="acciones">
+                    <form action="{{ url_for('insertar_detalles_producto', producto_id=producto.id) }}" method="get" style="display:inline;">
+                        <button type="submit">Agregar</button>
+                    </form>
+                    <form action="{{ url_for('ver_producto', id=producto.id) }}" method="get" style="display:inline;">
+                        <button type="submit">Editar</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>    
+</body>
+{% endblock %}

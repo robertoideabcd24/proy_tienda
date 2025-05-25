@@ -2,8 +2,14 @@ __pycache__/
 **/__pycache__/
 reporte/
 
+# Ignorar archivo para pruebas de cobertura
+reporte/
+.coverage
+**/.coverage
+
 # Ignorar entorno virtual
 .venv/
+<<<<<<< HEAD
 
 .pytest_cache/
 **/.pytest_cache/
@@ -13,3 +19,7 @@ reporte/
 
 .gitignore
 **/.gitignore
+=======
+.pytest_cache/
+**/.pytest_cache/
+>>>>>>> origin/test/pytest-admin
