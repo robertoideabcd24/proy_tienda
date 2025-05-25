@@ -7,6 +7,12 @@ def registrar_rutas(app):
     # Página de registro al sistema
     #----------------------------------------
     @app.route('/', methods=['GET', 'POST'])
+    @app.route('/consulta_productos', methods=['GET', 'POST'])
+    def consulta_productos():
+            resultados = Producto.consulta_prod()
+            return render_template("consultar_bien.html", datos=resultados)
+
+
     @app.route('/login', methods=['GET', 'POST'])
     def login_home():
         if request.method == 'POST':
@@ -52,9 +58,11 @@ def registrar_rutas(app):
     @app.route('/menu_usuario')
     def menu_usuario():
         if session.get('rol') == 2:
-            return render_template('usuario/menu_usuario.html')
+            resultados = Producto.consulta_prod() 
+            return render_template("usuario/consultar_prod_usu.html", datos=resultados)
         flash("Acceso no autorizado", 'danger')
         return redirect(url_for('login_home'))
+
 
     #----------------------------------------    
     # Página  del menu principal
@@ -122,10 +130,10 @@ def registrar_rutas(app):
 
     
     #----------------------------------------
-    # Página de la consulta de productos
+    # Página de la consulta de stock productos
     #----------------------------------------
-    @app.route('/consulta_productos', methods=['GET', 'POST'])
-    def consulta_productos():
+    @app.route('/consulta_stock', methods=['GET', 'POST'])
+    def consulta_stock():
         usuario_id = session.get('usuario_id')
         if not usuario_id:
             flash("Debes iniciar sesión para ver tus productos.", "warning")
@@ -153,7 +161,7 @@ def registrar_rutas(app):
                 return render_template('admin/editar_prod_admin.html', producto=producto)
             else:
                 flash("Producto no encontrado", "warning")
-                return redirect(url_for('consulta_productos'))
+                return redirect(url_for('consulta_stock'))
         except Exception as e:
             flash(f"Error al obtener el producto: {str(e)}", "danger")
             return redirect(url_for('login_home'))
@@ -179,7 +187,7 @@ def registrar_rutas(app):
                 exito = Producto.insertar_producto_en_db(nombre, precio, disponible, marca, descripcion, usuario_id)
                 if exito:
                     flash("Producto insertado exitosamente.", "success")
-                    return redirect(url_for('consulta_productos'))
+                    return redirect(url_for('consulta_stock'))
                 else:
                     flash("Ocurrió un error al insertar el producto.", "danger")
                     return redirect(url_for('insertar_producto'))
@@ -219,7 +227,7 @@ def registrar_rutas(app):
             producto = Producto.obtener_producto_por_id(producto_id)
             if not producto:
                 flash("Producto no encontrado", "warning")
-                return redirect(url_for('consulta_productos'))
+                return redirect(url_for('consulta_stock'))
 
             producto_detalles = Producto.obtener_detalles_por_id(producto_id)
             return render_template('admin/insertar_prod_det_admin.html', 
@@ -228,5 +236,10 @@ def registrar_rutas(app):
                                 producto_detalles=producto_detalles)
         except Exception as e:
             flash(f"Ocurrió un error: {str(e)}", "danger")
-            return redirect(url_for('consulta_productos'))
+            return redirect(url_for('consulta_stock'))
 
+     #----------------------------------------
+    # Página de la consulta de productos
+    #----------------------------------------
+    
+    
