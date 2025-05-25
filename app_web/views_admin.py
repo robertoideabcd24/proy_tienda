@@ -1,6 +1,18 @@
 from flask import render_template, request, redirect, url_for, session, flash
+from functools import wraps
 from .models.admin.usuario_admin import Usuario, UsuarioException
 from .models.admin.producto_admin import Producto, AltaProductoException, AltaProductoPrecioException, AltaProductoDescripcionException
+
+def rol_requerido(rol_permitido):
+    def decorador(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if 'rol' not in session or session['rol'] != rol_permitido:
+                flash("Acceso no autorizado", "danger")
+                return redirect(url_for('login_home'))
+            return func(*args, **kwargs)
+        return wrapper
+    return decorador
 
 def registrar_rutas(app):
     #----------------------------------------
@@ -49,6 +61,7 @@ def registrar_rutas(app):
     #----------------------------------------
     #roles 
     @app.route('/menu_admin')
+    @rol_requerido(1)
     def menu_admin():
         if session.get('rol') == 1:
             return render_template('admin/menu_admin.html')
@@ -56,6 +69,7 @@ def registrar_rutas(app):
         return redirect(url_for('login_home'))
 
     @app.route('/menu_usuario')
+    @rol_requerido(2)
     def menu_usuario():
         if session.get('rol') == 2:
             resultados = Producto.consulta_prod() 
@@ -63,18 +77,6 @@ def registrar_rutas(app):
         flash("Acceso no autorizado", 'danger')
         return redirect(url_for('login_home'))
 
-
-    #----------------------------------------    
-    # Página  del menu principal
-    #----------------------------------------
-    @app.route('/inicio', methods=['GET', 'POST']) 
-    def inicio_home():
-        try:
-            return render_template('admin/menu_admin.html')
-        except Exception as e:
-            flash(f"Error al cargar el menú: {str(e)}", "danger")
-            return redirect(url_for('login_home'))
-    
     #----------------------------------------
     # Página para insertar usuario
     #----------------------------------------
@@ -133,6 +135,7 @@ def registrar_rutas(app):
     # Página de la consulta de stock productos
     #----------------------------------------
     @app.route('/consulta_stock', methods=['GET', 'POST'])
+    @rol_requerido(1)
     def consulta_stock():
         usuario_id = session.get('usuario_id')
         if not usuario_id:
@@ -150,6 +153,7 @@ def registrar_rutas(app):
     # Detalle de la consulta de productos
     #----------------------------------------
     @app.route('/producto/<int:id>')
+    @rol_requerido(1)
     def ver_producto(id):
         usuario_id = session.get('usuario_id')
         if not usuario_id:
@@ -170,6 +174,7 @@ def registrar_rutas(app):
     # Página para insertar producto
     #----------------------------------------
     @app.route('/insertar_producto', methods=['GET', 'POST'])
+    @rol_requerido(1)
     def insertar_producto():
         usuario_id = session.get('usuario_id')
         if not usuario_id:
@@ -205,6 +210,7 @@ def registrar_rutas(app):
     # Insertar detalles del producto
     #----------------------------------------
     @app.route('/insertar_detalles_producto/<int:producto_id>', methods=['GET', 'POST'])
+    @rol_requerido(1)
     def insertar_detalles_producto(producto_id):
         usuario_id = session.get('usuario_id')
         if not usuario_id:
