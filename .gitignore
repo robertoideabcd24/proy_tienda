@@ -1,6 +1,15 @@
-# Ignorar cachés de Python
 __pycache__/
 **/__pycache__/
+reporte/
 
 # Ignorar entorno virtual
 .venv/
+
+.pytest_cache/
+**/.pytest_cache/
+
+.coverage
+**/.coverage
+
+.gitignore
+**/.gitignore
