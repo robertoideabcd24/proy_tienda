@@ -1,4 +1,4 @@
 
-from .postgres_db import PostgresDB
+from postgres_db import PostgresDB
 
 pgdb = PostgresDB()

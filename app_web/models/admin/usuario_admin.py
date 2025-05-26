@@ -1,4 +1,4 @@
-from ...extension import pgdb
+from extension import pgdb
 
 class UsuarioException(Exception): pass
 

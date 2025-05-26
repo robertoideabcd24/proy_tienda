@@ -77,7 +77,12 @@
                     <p>Descripción: {{ producto.descripcion }}</p>
                     <p>Disponible: {{ producto.disponible }}</p>
                     <p>Precio: ${{ producto.precio }}</p>
-                    <button type="button">Agregar al carrito</button>
+                    
+                <form action="{{ url_for('agregar_carrito', id=producto.id) }}" method="post">
+                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                    <button type="submit">Agregar al carrito</button>
+                </form>
+
                 </div>
             </a>
         {% endfor %}

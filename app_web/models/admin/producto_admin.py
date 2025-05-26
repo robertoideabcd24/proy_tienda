@@ -1,4 +1,4 @@
-from ...extension import pgdb
+from extension import pgdb
 import psycopg2.errors
 
 # Definición de excepciones 
