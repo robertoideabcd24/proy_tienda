@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Producto {{ producto.desc }}{% endblock %}
+
+{% block content %}
+<div class="regresar-btn">
+        <a href="{{ url_for('consulta_productos') }}" class="btn-regresar">Volver</a>
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
+    <!-- Contenedor principal con dos columnas -->
+    <div style="display: flex; border: 1px solid #ccc; padding: 20px; border-radius: 10px; background-color: #f4f4f4;">
+
+        <!-- Info del producto -->
+        <div style="margin-right: 40px; text-align: center;">
+            <h1>{{ producto.desc }}</h1>
+            <p><strong>Nombre:</strong> {{ producto.nombre }}</p>
+            <p><strong>Disponible:</strong> {{ producto.disponible }}</p>
+            <p><strong>Marca:</strong> {{ producto.marca }}</p>
+            <p><strong>Descripcion:</strong> {{ producto.descripcion }}</p>
+            <p><strong>Precio:</strong> ${{ producto.precio }}</p>
+        </div>
+
+        <!-- Botones de acción -->
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 1px solid #ccc; padding-left: 40px;">
+            
+                <button style="padding: 10px 20px; margin-bottom: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Comprar
+                </button>
+                <button style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Agregar al carrito
+                </button>
+            
+        </div>
+
+    </div>
+</div>
+{% endblock %}

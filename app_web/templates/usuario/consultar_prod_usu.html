@@ -55,7 +55,7 @@
     
     <div class="productos">
         {% for producto in datos %}
-            <a href="{{ url_for('ver_producto', id=producto.id) }}" style="text-decoration: none; color: inherit;">
+            <a href="{{ url_for('comprar_producto', id=producto.id) }}" style="text-decoration: none; color: inherit;">
                 <div class="producto">
                     <h2>{{ producto.nombre }}</h2>  
                     <p>Marca: {{ producto.marca }}</p>

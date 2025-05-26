@@ -169,6 +169,28 @@ def registrar_rutas(app):
         except Exception as e:
             flash(f"Error al obtener el producto: {str(e)}", "danger")
             return redirect(url_for('login_home'))
+        
+
+    #----------------------------------------
+    # Detalle de la consulta de productos
+    #----------------------------------------
+    @app.route('/comprar/<int:id>')
+    #@rol_requerido(2)
+    def comprar_producto(id):
+        # usuario_id = session.get('usuario_id')
+        # if not usuario_id:
+        #     flash("Debes iniciar sesión para ver tus productos.", "warning")
+        #     return redirect(url_for('login_home'))
+        try:
+            producto = Producto.obtener_producto_por_id(id)
+            if producto:
+                return render_template('usuario/comprar_prod_usu.html', producto=producto)
+            else:
+                flash("Producto no encontrado", "warning")
+                return redirect(url_for('consulta_stock'))
+        except Exception as e:
+            flash(f"Error al obtener el producto: {str(e)}", "danger")
+            return redirect(url_for('login_home'))
 
     #----------------------------------------
     # Página para insertar producto
