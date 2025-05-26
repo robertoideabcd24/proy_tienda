@@ -36,6 +36,21 @@
             color: #666;
         }
 
+        .producto button {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #7B9FD5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .producto button:hover {
+            background-color: #5b84c4;
+        }
+
         /* Responsividad: cuando la pantalla es más pequeña (móvil) */
         @media (max-width: 768px) {
             .productos {
@@ -51,17 +66,18 @@
     </style>
 </head>
 <body>
-    <h1>Lista de Productos</h1>
+    <h1>Lista de Productos  modificada</h1>
     
     <div class="productos">
         {% for producto in datos %}
-            <a href="{{ url_for('comprar_producto', id=producto.id) }}" style="text-decoration: none; color: inherit;">
+            <a href="{{ url_for('ver_producto_usuario', id=producto.id) }}" style="text-decoration: none; color: inherit;">
                 <div class="producto">
                     <h2>{{ producto.nombre }}</h2>  
                     <p>Marca: {{ producto.marca }}</p>
                     <p>Descripción: {{ producto.descripcion }}</p>
                     <p>Disponible: {{ producto.disponible }}</p>
                     <p>Precio: ${{ producto.precio }}</p>
+                    <button type="button">Agregar al carrito</button>
                 </div>
             </a>
         {% endfor %}
