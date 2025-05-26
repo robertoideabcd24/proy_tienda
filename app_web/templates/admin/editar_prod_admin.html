@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="regresar-btn">
-        <a href="{{ url_for('consulta_productos') }}" class="btn-regresar">Volver</a>
+        <a href="{{ url_for('consulta_stock') }}" class="btn-regresar">Volver</a>
 </div>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
