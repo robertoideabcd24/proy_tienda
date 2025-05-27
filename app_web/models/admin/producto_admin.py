@@ -69,12 +69,15 @@ class Producto:
                 cursor.execute("""
                     INSERT INTO productos (nombre, precio, disponible, marca, descripcion, usuario_id)
                     VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id
                 """, (nombre, float(precio), disponible, marca, descripcion, usuario_id))
+                producto_id = cursor.fetchone()[0]
                 cursor.connection.commit()
-            return True
+            return producto_id
         except Exception as e:
             print("Error al insertar producto en la base de datos:", e)
-            return False
+            raise AltaProductoException("Error al insertar el producto en la base de datos") from e
+
         
     @staticmethod
     def obtener_producto_por_id(id):
@@ -112,12 +115,12 @@ class Producto:
                 )
                 cursor.connection.commit()
             return True
-        except psycopg2.errors.ForeignKeyViolation as fk:
-            print("Error: El producto no existe o tiene relación con otras tablas:", fk)
-            return False
+        except psycopg2.errors.UniqueViolation:
+            raise ProductoDetalleException("Ya existe un detalle con esta combinación de producto, talla y color")
+        except psycopg2.errors.ForeignKeyViolation:
+            raise ProductoDetalleException("El producto especificado no existe")
         except Exception as e:
-            print("Error al insertar detalle del producto:", e)
-            return False
+            raise ProductoDetalleException(f"Error al insertar detalle del producto: {str(e)}")
 
     @staticmethod
     def obtener_detalles_por_id(producto_id):
