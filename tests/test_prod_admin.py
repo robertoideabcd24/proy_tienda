@@ -7,7 +7,8 @@ from app_web.models.admin.producto_admin import (
     AltaProductoPrecioException,
     ProductoNoEncontradoException,
     AltaProductoException,
-    ProductoDetalleException
+    ProductoDetalleException,
+    DBException
 )
 
 

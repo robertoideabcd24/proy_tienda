@@ -168,7 +168,7 @@ def registrar_rutas(app):
                 return redirect(url_for('consulta_stock'))
         except Exception as e:
             flash(f"Error al obtener el producto: {str(e)}", "danger")
-            return redirect(url_for('login_home'))
+            return redirect(url_for('consulta_stock'))
         
 
     #----------------------------------------
@@ -187,10 +187,10 @@ def registrar_rutas(app):
                 return render_template('usuario/comprar_prod_usu.html', producto=producto)
             else:
                 flash("Producto no encontrado", "warning")
-                return redirect(url_for('consulta_stock'))
+                return redirect(url_for('consulta_productos'))
         except Exception as e:
             flash(f"Error al obtener el producto: {str(e)}", "danger")
-            return redirect(url_for('login_home'))
+            return redirect(url_for('consulta_productos'))
 
     #----------------------------------------
     # Página para insertar producto
