@@ -4,11 +4,13 @@
 
 {% block content %}
 
-    {% with mensajes = get_flashed_messages(with_categories=true) %}
-        {% if mensajes %}
-            {% for categoria, mensaje in mensajes %}
-            <div class="alert alert-{{ categoria }} mt-2">{{ mensaje }}</div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+            <li>{{ message }}</li>
             {% endfor %}
+            </ul>
         {% endif %}
     {% endwith %}
 
