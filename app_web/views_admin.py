@@ -1,7 +1,8 @@
 from flask import render_template, request, redirect, url_for, session, flash
 from functools import wraps
 from .models.admin.usuario_admin import Usuario, UsuarioException
-from .models.admin.producto_admin import Producto, AltaProductoException, AltaProductoPrecioException, AltaProductoDescripcionException
+from .models.admin.producto_admin import Producto, AltaProductoException, AltaProductoPrecioException, AltaProductoDescripcionException, ProductoNoEncontradoException,ProductoDetalleException
+
 
 def rol_requerido(rol_permitido):
     def decorador(func):
@@ -150,27 +151,124 @@ def registrar_rutas(app):
             return redirect(url_for('login_home'))
 
     #----------------------------------------
-    # Detalle de la consulta de productos
+    # Detalle de la consulta de productos para editar
     #----------------------------------------
-    @app.route('/producto/<int:id>')
+    @app.route('/producto/<int:id>', methods=['GET', 'POST'])
     @rol_requerido(1)
-    def ver_producto(id):
+    def editar_producto(id):
         usuario_id = session.get('usuario_id')
         if not usuario_id:
             flash("Debes iniciar sesión para ver tus productos.", "warning")
             return redirect(url_for('login_home'))
+
+        # Manejar actualización de detalles
+        if request.method == 'POST' and 'talla' in request.form:
+            try:
+                detalle_id = request.form.get('detalle_id')
+                talla = request.form['talla']
+                color = request.form['color']
+                stock = request.form['stock']
+
+                if detalle_id:  # Actualización
+                    Producto.actualizar_detalle_producto(detalle_id, talla, color, stock)
+                    flash("Detalle actualizado correctamente", "info")
+                else:  # Nuevo detalle
+                    Producto.insertar_detalle_producto(id, talla, color, stock)
+                    flash("Detalle agregado correctamente", "info")
+                    
+                return redirect(url_for('editar_producto', id=id))
+
+            except ProductoDetalleException as e:
+                flash(str(e), "danger")
+            except Exception as e:
+                print("Error al actualizar detalle:", e)
+                flash("Error al actualizar detalle", "danger")
+            return redirect(url_for('editar_producto', id=id))
+
+        # Manejar eliminación de detalles
+        if request.method == 'POST' and 'eliminar_detalle' in request.form:
+            try:
+                detalle_id = request.form['eliminar_detalle']
+                Producto.eliminar_detalle_producto(detalle_id)
+                flash("Detalle eliminado correctamente", "info")
+            except ProductoDetalleException as e:
+                flash(str(e), "danger")
+            except Exception as e:
+                print("Error al eliminar detalle:", e)
+                flash("Error al eliminar detalle", "danger")
+            return redirect(url_for('editar_producto', id=id))
+
+        # Manejar actualización del producto principal
+        if request.method == 'POST':
+            try:
+                nombre = request.form['nombre']
+                precio = float(request.form['precio'])
+                disponible = 'disponible' in request.form 
+                marca = request.form['marca']
+                descripcion = request.form['descripcion']
+
+                Producto.actualizar_producto(
+                    id=id,
+                    nombre=nombre,
+                    precio=precio,
+                    disponible=disponible,
+                    marca=marca,
+                    descripcion=descripcion,
+                    usuario_id=usuario_id
+                )
+                
+                flash("Producto actualizado correctamente", "success")
+                return redirect(url_for('editar_producto', id=id))
+
+            except ProductoNoEncontradoException as e:
+                flash(str(e), "warning")
+            except Exception as e:
+                print("Error al actualizar producto:", e)
+                flash("Error al actualizar producto", "danger")
+            return redirect(url_for('editar_producto', id=id))
+
+        # Si es GET
         try:
             producto = Producto.obtener_producto_por_id(id)
-            if producto:
-                return render_template('admin/editar_prod_admin.html', producto=producto)
-            else:
+            if producto is None:
                 flash("Producto no encontrado", "warning")
                 return redirect(url_for('consulta_stock'))
+            
+            detalles = Producto.obtener_detalles_completos_por_id(id)
+            
         except Exception as e:
-            flash(f"Error al obtener el producto: {str(e)}", "danger")
+            print("Error al obtener producto:", e)
+            flash("Error al consultar producto", "danger")
             return redirect(url_for('consulta_stock'))
-        
 
+        return render_template('admin/editar_prod_admin.html', 
+                            producto=producto, 
+                            detalles=detalles)
+
+    #----------------------------------------
+    # Eliminar producto
+    #----------------------------------------
+    @app.route('/eliminar_producto/<int:id>', methods=['POST'])
+    @rol_requerido(1)
+    def eliminar_producto(id):
+        usuario_id = session.get('usuario_id')
+        if not usuario_id:
+            flash("Debes iniciar sesión para eliminar productos.", "warning")
+            return redirect(url_for('login_home'))
+
+        try:
+            Producto.eliminar_producto(id=id, usuario_id=usuario_id)
+            flash("Producto eliminado correctamente", "success")
+        except ProductoNoEncontradoException as e:
+            flash(str(e), "warning")
+        except ProductoDetalleException as e:
+            flash(str(e), "danger")
+        except Exception as e:
+            print("Error al eliminar producto:", e)
+            flash("Error al eliminar el producto", "danger")
+        
+        return redirect(url_for('consulta_stock'))
+    
     #----------------------------------------
     # Detalle de la consulta de productos
     #----------------------------------------
@@ -213,7 +311,7 @@ def registrar_rutas(app):
 
                 exito = Producto.insertar_producto_en_db(nombre, precio, disponible, marca, descripcion, usuario_id)
                 if exito:
-                    flash("Producto insertado exitosamente.", "success")
+                    flash("Producto insertado exitosamente.", "info")
                     return redirect(url_for('consulta_stock'))
                 else:
                     flash("Ocurrió un error al insertar el producto.", "danger")
@@ -247,7 +345,7 @@ def registrar_rutas(app):
 
                 exito = Producto.insertar_detalle_producto(producto_id, talla, color, stock)
                 if exito:
-                    flash("Detalle del producto insertado correctamente.", "success")
+                    flash("Detalle del producto insertado correctamente.", "info")
                     return redirect(url_for('insertar_detalles_producto', producto_id=producto_id))
                 else:
                     flash("Error al insertar detalles del producto.", "danger")
