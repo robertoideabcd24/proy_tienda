@@ -1,9 +1,18 @@
 from ...extension import pgdb
+from datetime import datetime
 
 class UsuarioException(Exception): pass
 
 class Usuario:
     def __init__(self, nombre=None, fecha_nacimiento=None, rol=None, correo=None, contrasena=None):
+        if not all([nombre, fecha_nacimiento, rol, correo, contrasena]):
+            raise UsuarioException("Todos los campos son obligatorios")
+        
+        try:
+            datetime.strptime(fecha_nacimiento, "%Y-%m-%d")
+        except ValueError:
+            raise UsuarioException("Formato de fecha inválido")
+
         self.nombre = nombre
         self.fecha_nacimiento = fecha_nacimiento
         self.rol = rol
@@ -49,7 +58,13 @@ class Usuario:
         try:
             if not all([nombre, fecha_nacimiento, rol, correo, contrasena]):
                 raise UsuarioException("Todos los campos son obligatorios para registrar un usuario.")
-            
+
+            # Validar formato de fecha
+            try:
+                datetime.strptime(fecha_nacimiento, "%Y-%m-%d")
+            except ValueError:
+                raise UsuarioException("Formato de fecha inválido")
+
             with pgdb.get_cursor() as cursor:
                 cursor.execute(
                     """
