@@ -237,3 +237,72 @@ class Producto:
         except Exception as e:
             print("Error al eliminar producto:", e)
             raise Exception("Error al eliminar el producto") from e
+
+
+    @staticmethod
+    def actualizar_detalle_producto(detalle_id, talla, color, stock):
+        try:
+            with pgdb.get_cursor() as cursor:
+                cursor.execute("""
+                    UPDATE producto_detalles 
+                    SET talla = %s, color = %s, stock = %s
+                    WHERE id = %s
+                    RETURNING id
+                """, (talla, color, int(stock), detalle_id))
+                
+                actualizado = cursor.fetchone()
+                cursor.connection.commit()
+                
+                if not actualizado:
+                    raise ProductoDetalleException("No se pudo actualizar el detalle del producto")
+                
+                return True
+                
+        except psycopg2.errors.UniqueViolation:
+            raise ProductoDetalleException("Ya existe un detalle con esta combinación de talla y color para este producto")
+        except Exception as e:
+            print("Error al actualizar detalle del producto:", e)
+            raise ProductoDetalleException("Error al actualizar el detalle del producto") from e
+
+    @staticmethod
+    def eliminar_detalle_producto(detalle_id):
+        try:
+            with pgdb.get_cursor() as cursor:
+                cursor.execute("""
+                    DELETE FROM producto_detalles 
+                    WHERE id = %s
+                    RETURNING id
+                """, (detalle_id,))
+                
+                eliminado = cursor.fetchone()
+                cursor.connection.commit()
+                
+                if not eliminado:
+                    raise ProductoDetalleException("No se pudo eliminar el detalle del producto")
+                
+                return True
+                
+        except Exception as e:
+            print("Error al eliminar detalle del producto:", e)
+            raise ProductoDetalleException("Error al eliminar el detalle del producto") from e
+
+    @staticmethod
+    def obtener_detalles_completos_por_id(producto_id):
+        query = """
+        SELECT id, producto_id, talla, color, stock
+        FROM producto_detalles
+        WHERE producto_id = %s
+        ORDER BY talla, color
+        """
+        try:
+            with pgdb.get_cursor() as cursor:
+                cursor.execute(query, (producto_id,))
+                detalles = cursor.fetchall()
+                
+                # Convertir a lista de diccionarios
+                column_names = [desc[0] for desc in cursor.description]
+                return [dict(zip(column_names, row)) for row in detalles]
+                
+        except Exception as e:
+            print("Error al obtener detalles del producto:", e)
+            raise ProductoDetalleException("Error al obtener detalles del producto") from e
