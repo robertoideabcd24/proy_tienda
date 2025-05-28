@@ -162,3 +162,78 @@ class Producto:
 
 
 #Modificar producto
+
+    @staticmethod
+    def actualizar_producto(id, nombre, precio, disponible, marca, descripcion, usuario_id=None):
+        """
+        Actualiza un producto en la base de datos
+        Si se proporciona usuario_id, verifica que el producto le pertenezca
+        """
+        try:
+            with pgdb.get_cursor() as cursor:
+                if usuario_id:
+                    # Verificar que el producto pertenezca al usuario
+                    cursor.execute("SELECT id FROM productos WHERE id = %s AND usuario_id = %s", 
+                                 (id, usuario_id))
+                    if not cursor.fetchone():
+                        raise ProductoNoEncontradoException("Producto no encontrado o no pertenece al usuario")
+
+                # Actualizar el producto
+                cursor.execute("""
+                    UPDATE productos 
+                    SET nombre = %s, precio = %s, disponible = %s, marca = %s, descripcion = %s
+                    WHERE id = %s
+                    RETURNING id
+                """, (nombre, float(precio), disponible, marca, descripcion, id))
+                
+                actualizado = cursor.fetchone()
+                cursor.connection.commit()
+                
+                if not actualizado:
+                    raise ProductoNoEncontradoException("No se pudo actualizar el producto")
+                
+                return True
+                
+        except ProductoNoEncontradoException:
+            raise
+        except Exception as e:
+            print("Error al actualizar producto:", e)
+            raise Exception("Error al actualizar el producto") from e
+
+    @staticmethod
+    def eliminar_producto(id, usuario_id=None):
+        """
+        Elimina un producto y sus detalles
+        Si se proporciona usuario_id, verifica que el producto le pertenezca
+        """
+        try:
+            with pgdb.get_cursor() as cursor:
+                if usuario_id:
+                    # Verificar que el producto pertenezca al usuario
+                    cursor.execute("SELECT id FROM productos WHERE id = %s AND usuario_id = %s", 
+                                 (id, usuario_id))
+                    if not cursor.fetchone():
+                        raise ProductoNoEncontradoException("Producto no encontrado o no pertenece al usuario")
+
+                # Eliminar detalles primero
+                cursor.execute("DELETE FROM producto_detalles WHERE producto_id = %s", (id,))
+                
+                # Eliminar el producto
+                cursor.execute("DELETE FROM productos WHERE id = %s RETURNING id", (id,))
+                eliminado = cursor.fetchone()
+                cursor.connection.commit()
+                
+                if not eliminado:
+                    raise ProductoNoEncontradoException("No se pudo eliminar el producto")
+                
+                return True
+                
+        except psycopg2.Error as e:
+            if e.pgcode == '42501':  # Permiso denegado
+                raise ProductoDetalleException("No tienes permisos para eliminar productos")
+            raise ProductoDetalleException(f"Error de base de datos: {str(e)}")
+        except ProductoNoEncontradoException:
+            raise
+        except Exception as e:
+            print("Error al eliminar producto:", e)
+            raise Exception("Error al eliminar el producto") from e
