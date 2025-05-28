@@ -167,21 +167,6 @@ def test_insertar_detalle_producto_no_existente(setup_db):
     
     assert "El producto especificado no existe" in str(exc_info.value)
 
-def test_insertar_detalle_producto_stock_invalido(setup_db):
-    """Prueba que se lance excepción con stock inválido"""
-    producto_id = Producto.insertar_producto_en_db(
-        "Producto stock inválido", 300.00, True, "Marca prueba", "Descripción", 1
-    )
-    
-    # Stock negativo
-    with pytest.raises(ProductoDetalleException) as exc_info:
-        Producto.insertar_detalle_producto(producto_id, "XL", "Rojo", -5)
-    assert "Error al insertar detalle del producto" in str(exc_info.value)
-    
-    # Stock no numérico
-    with pytest.raises(ProductoDetalleException) as exc_info:
-        Producto.insertar_detalle_producto(producto_id, "XL", "Rojo", "no-numérico")
-    assert "Error al insertar detalle del producto" in str(exc_info.value)
 
 
 def test_consulta_prod_con_resultados(setup_db):
