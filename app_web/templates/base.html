@@ -135,13 +135,16 @@
       <div class="botones">
         <button>Buscar</button>
         <button onclick="window.location.href='/compras'">Compras</button>
+
+        {% if session.rol == 1 %}
+          <button onclick="window.location.href='/menu_admin'">Productos</button>
+        {% endif %}
         
         {% if session.usuario %}
           <button onclick="window.location.href='/perfil_usuario'">{{ session.usuario }}</button>
         {% else %}
           <button onclick="window.location.href='/login'">Iniciar sesión</button>
         {% endif %}
-
 
         <button onclick="window.location.href='/carrito'">Carrito</button>
       </div>
