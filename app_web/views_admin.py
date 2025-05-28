@@ -146,9 +146,13 @@ def registrar_rutas(app):
         try:
             resultados = Producto.consulta_prod_por_usuario(usuario_id)
             return render_template("admin/consultar_prod_admin.html", datos=resultados)
+        except ProductoNoEncontradoException as e:
+            flash(str(e), "info")
+            # Mostramos la página igual pero con datos vacíos y un mensaje
+            return render_template("admin/consultar_prod_admin.html", datos=[])
         except Exception as e:
             flash(f"Error al consultar productos: {str(e)}", "danger")
-            return redirect(url_for('login_home'))
+            return render_template("admin/consultar_prod_admin.html", datos=[])
 
     #----------------------------------------
     # Detalle de la consulta de productos para editar
