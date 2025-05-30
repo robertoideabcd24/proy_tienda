@@ -152,10 +152,7 @@ def registrar_rutas(app):
     @rol_requerido(1)
     def consulta_stock():
         usuario_id = session.get('usuario_id')
-        if not usuario_id:
-            flash("Debes iniciar sesión para ver tus productos.", "warning")
-            return redirect(url_for('login_home'))
-        
+       
         try:
             resultados = Producto.consulta_prod_por_usuario(usuario_id)
             return render_template("admin/consultar_prod_admin.html", datos=resultados)
