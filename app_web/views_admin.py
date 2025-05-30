@@ -171,10 +171,6 @@ def registrar_rutas(app):
     @rol_requerido(1)
     def editar_producto(id):
         usuario_id = session.get('usuario_id')
-        if not usuario_id:
-            flash("Debes iniciar sesión para ver tus productos.", "warning")
-            return redirect(url_for('login_home'))
-
         # Manejar actualización de detalles
         if request.method == 'POST' and 'talla' in request.form:
             try:
@@ -266,9 +262,6 @@ def registrar_rutas(app):
     @rol_requerido(1)
     def eliminar_producto(id):
         usuario_id = session.get('usuario_id')
-        if not usuario_id:
-            flash("Debes iniciar sesión para eliminar productos.", "warning")
-            return redirect(url_for('login_home'))
 
         try:
             Producto.eliminar_producto(id=id, usuario_id=usuario_id)
@@ -311,19 +304,36 @@ def registrar_rutas(app):
     @rol_requerido(1)
     def insertar_producto():
         usuario_id = session.get('usuario_id')
-        if not usuario_id:
-            flash("Debes iniciar sesión para insertar productos.", "warning")
-            return redirect(url_for('login_home'))
 
         if request.method == 'POST':
             try:
-                nombre = request.form['nombre']
-                precio = request.form['precio']
+                nombre = request.form['nombre'].strip()
+                precio_str = request.form['precio'].strip()
                 disponible = 'disponible' in request.form
-                marca = request.form['marca']
-                descripcion = request.form['descripcion']
+                marca = request.form['marca'].strip()
+                descripcion = request.form['descripcion'].strip()
 
+                # Validaciones
+                if not nombre:
+                    raise AltaProductoException("El nombre no puede estar vacío")
+
+                if not precio_str:
+                    raise AltaProductoPrecioException("El precio no puede estar vacío")
+
+                try:
+                    precio = float(precio_str)
+                except ValueError:
+                    raise AltaProductoPrecioException("El precio debe ser un número")
+
+                if precio < 0:
+                    raise AltaProductoPrecioException("el precio no puede ser negativo")
+
+                if not descripcion:
+                    raise AltaProductoDescripcionException("la descripción no puede estar vacía")
+
+                # Inserción
                 exito = Producto.insertar_producto_en_db(nombre, precio, disponible, marca, descripcion, usuario_id)
+
                 if exito:
                     flash("Producto insertado exitosamente.", "info")
                     return redirect(url_for('consulta_stock'))
@@ -334,11 +344,13 @@ def registrar_rutas(app):
             except (AltaProductoException, AltaProductoPrecioException, AltaProductoDescripcionException) as e:
                 flash(str(e), "warning")
                 return redirect(url_for('insertar_producto'))
+
             except Exception as e:
                 flash(f"Error inesperado: {str(e)}", "danger")
                 return redirect(url_for('insertar_producto'))
 
         return render_template('admin/insertar_prod_admin.html')
+
     
     #----------------------------------------
     # Insertar detalles del producto

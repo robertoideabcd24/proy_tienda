@@ -1,15 +1,13 @@
-from unittest.mock import patch
 import pytest
-
 from app_web.sistema import app
 from app_web.extension import pgdb
 from app_web.models.admin.usuario_admin import Usuario, UsuarioException
 from app_web.models.admin.producto_admin import Producto, ProductoNoEncontradoException
 from flask import session, get_flashed_messages, url_for, get_flashed_messages, request
-from app_web.sistema import app
 from html import unescape
 from app_web.views_admin import render_template as original_render
 import app_web.views_admin
+from unittest.mock import patch
 
 @pytest.fixture
 def client():

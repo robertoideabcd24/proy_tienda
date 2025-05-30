@@ -8,6 +8,7 @@ class DBException(Exception): pass
 class AltaProductoDescripcionException(Exception): pass
 class ProductoNoEncontradoException(Exception): pass
 class ProductoDetalleException(Exception): pass
+class AltaProductoDescripcionException(AltaProductoException): pass
 
 class Producto:
     def __init__(self, descripcion=None, precio=None, id=None):
