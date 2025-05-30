@@ -397,3 +397,4 @@ def registrar_rutas(app):
     #----------------------------------------
     
     
+print("hola")
