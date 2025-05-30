@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, session, flash
 from functools import wraps
 from .models.admin.usuario_admin import Usuario, UsuarioException
 from .models.admin.producto_admin import Producto, AltaProductoException, AltaProductoPrecioException, AltaProductoDescripcionException, ProductoNoEncontradoException,ProductoDetalleException
-
+from .extension import pgdb
 
 def rol_requerido(rol_permitido):
     def decorador(func):
@@ -171,6 +171,10 @@ def registrar_rutas(app):
     @rol_requerido(1)
     def editar_producto(id):
         usuario_id = session.get('usuario_id')
+        if not usuario_id:
+            flash("Debes iniciar sesión para ver tus productos.", "warning")
+            return redirect(url_for('login_home'))
+
         # Manejar actualización de detalles
         if request.method == 'POST' and 'talla' in request.form:
             try:
@@ -254,6 +258,7 @@ def registrar_rutas(app):
         return render_template('admin/editar_prod_admin.html', 
                             producto=producto, 
                             detalles=detalles)
+
 
     #----------------------------------------
     # Eliminar producto
@@ -359,10 +364,7 @@ def registrar_rutas(app):
     @rol_requerido(1)
     def insertar_detalles_producto(producto_id):
         usuario_id = session.get('usuario_id')
-        if not usuario_id:
-            flash("Debes iniciar sesión para insertar detalles del producto.", "warning")
-            return redirect(url_for('login_home'))
-
+        
         try:
             if request.method == 'POST':
                 talla = request.form['talla']

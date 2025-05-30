@@ -68,46 +68,50 @@
             <h3>Detalles existentes</h3>
             {% if detalles %}
                 {% for detalle in detalles %}
-                <form method="POST" action="{{ url_for('editar_producto', id=producto.id) }}"
-                      style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; background-color: #f4f4f4; margin-bottom: 15px;">
-                    <input type="hidden" name="detalle_id" value="{{ detalle.id }}">
-                    
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <div style="width: 30%;">
+                <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; background-color: #f4f4f4; margin-bottom: 15px;">
+                    <!-- Contenedor de los campos del formulario -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div>
                             <label>Talla</label>
-                            <input type="text" name="talla" value="{{ detalle.talla }}" required style="width: 100%;">
+                            <input type="text" form="form-editar-{{ detalle.id }}" name="talla" value="{{ detalle.talla }}" required style="width: 100%;">
                         </div>
-                        
-                        <div style="width: 30%;">
+                        <div>
                             <label>Color</label>
-                            <input type="text" name="color" value="{{ detalle.color }}" required style="width: 100%;">
+                            <input type="text" form="form-editar-{{ detalle.id }}" name="color" value="{{ detalle.color }}" required style="width: 100%;">
                         </div>
-                        
-                        <div style="width: 30%;">
+                        <div>
                             <label>Stock</label>
-                            <input type="number" name="stock" value="{{ detalle.stock }}" required style="width: 100%;">
+                            <input type="number" form="form-editar-{{ detalle.id }}" name="stock" value="{{ detalle.stock }}" required style="width: 100%;">
                         </div>
                     </div>
                     
-                    <div style="display: flex; justify-content: space-between;">
-                        <button type="submit" style="background-color: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;">
-                            Actualizar
-                        </button>
+                    <!-- Contenedor de botones alineados horizontalmente -->
+                    <div style="display: flex; gap: 10px;">
+                        <!-- Formulario para editar (oculto, se referencia desde los inputs) -->
+                        <form id="form-editar-{{ detalle.id }}" method="POST" action="{{ url_for('editar_producto', id=producto.id) }}">
+                            <input type="hidden" name="detalle_id" value="{{ detalle.id }}">
+                            <button type="submit"
+                                    style="background-color: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                                Actualizar
+                            </button>
+                        </form>
                         
-                        <button type="submit" name="eliminar_detalle" value="{{ detalle.id }}"
-                                style="background-color: #f44336; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;"
-                                onclick="return confirm('¿Estás seguro de que quieres eliminar este detalle?');">
-                            Eliminar
-                        </button>
+                        <!-- Formulario para eliminar -->
+                        <form method="POST" action="{{ url_for('editar_producto', id=producto.id) }}"
+                              onsubmit="return confirm('¿Estás seguro de que quieres eliminar este detalle?');">
+                            <input type="hidden" name="eliminar_detalle" value="{{ detalle.id }}">
+                            <button type="submit"
+                                    style="background-color: #f44336; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                                Eliminar
+                            </button>
+                        </form>
                     </div>
-                </form>
+                </div>
                 {% endfor %}
             {% else %}
                 <p>No hay detalles registrados para este producto.</p>
             {% endif %}
         </div>
-        
-        
     </div>
 </div>
 {% endblock %}
