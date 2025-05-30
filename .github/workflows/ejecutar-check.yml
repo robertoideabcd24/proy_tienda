@@ -1,0 +1,14 @@
+name: Verificar código
+
+on: [push]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clonar repositorio
+      uses: actions/checkout@v3
+
+    - name: Mostrar estructura del proyecto
+      run: ls -R
