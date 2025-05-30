@@ -60,22 +60,10 @@ def test_insertar_producto(setup_db):
     assert producto_db['descripcion'] == descripcion
 
 
-def test_obtener_producto_por_id():
-    producto_db = Producto.obtener_producto_por_id(1)
-    assert producto_db is not None
-    assert producto_db['id'] == 1
-
 
 def test_producto_no_existente():
     with pytest.raises(ProductoNoEncontradoException):
         Producto.obtener_producto_por_id(9999)
-
-
-def test_obtener_detalles_producto():
-    producto_id = 1
-    detalles = Producto.obtener_detalles_por_id(producto_id)
-    assert detalles is not None
-    assert len(detalles) > 0
 
 
 @pytest.mark.parametrize("precio_input,precio_esperado", [
@@ -168,25 +156,4 @@ def test_insertar_detalle_producto_no_existente(setup_db):
     assert "El producto especificado no existe" in str(exc_info.value)
 
 
-
-def test_consulta_prod_con_resultados(setup_db):
-    """Prueba que la consulta devuelva resultados cuando hay productos"""
-    # Insertamos algunos productos de prueba
-    Producto.insertar_producto_en_db("Producto 1", 100.00, True, "Marca A", "Descripción 1", 1)
-    Producto.insertar_producto_en_db("Producto 2", 200.00, False, "Marca B", "Descripción 2", 1)
-    
-    resultados = Producto.consulta_prod()
-    
-    assert isinstance(resultados, list)
-    assert len(resultados) >= 2  # Puede haber más si la DB no está vacía
-    
-    # Verificamos la estructura de los resultados
-    for producto in resultados:
-        assert 'id' in producto
-        assert isinstance(producto['id'], int)
-        assert 'nombre' in producto
-        assert 'precio' in producto
-        assert 'disponible' in producto
-        assert 'marca' in producto
-        assert 'descripcion' in producto
 

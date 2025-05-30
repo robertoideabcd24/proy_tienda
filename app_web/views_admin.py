@@ -22,8 +22,15 @@ def registrar_rutas(app):
     @app.route('/', methods=['GET', 'POST'])
     @app.route('/consulta_productos', methods=['GET', 'POST'])
     def consulta_productos():
-            resultados = Producto.consulta_prod()
-            return render_template("consultar_bien.html", datos=resultados)
+            try:
+                resultados = Producto.consulta_prod()
+                return render_template("consultar_bien.html", datos=resultados)
+            except ProductoNoEncontradoException as pne:
+                flash(str(pne), "danger")
+                return render_template("consultar_bien.html", datos=[])
+            except Exception as e:
+                flash(f"Error al consultar productos: {str(e)}", "danger")
+                return render_template("consultar_bien.html", datos=[])
 
 
     @app.route('/login', methods=['GET', 'POST'])
@@ -64,19 +71,25 @@ def registrar_rutas(app):
     @app.route('/menu_admin')
     @rol_requerido(1)
     def menu_admin():
-        if session.get('rol') == 1:
+        try:
             return render_template('admin/menu_admin.html')
-        flash("Acceso no autorizado", 'danger')
-        return redirect(url_for('login_home'))
+        except Exception as e:
+            flash(f"Error al acceder al menú de administrador: {str(e)}", 'danger')
+            return redirect(url_for('login_home'))
 
     @app.route('/menu_usuario')
     @rol_requerido(2)
     def menu_usuario():
-        if session.get('rol') == 2:
-            resultados = Producto.consulta_prod() 
-            return render_template("usuario/consultar_prod_usu.html", datos=resultados)
-        flash("Acceso no autorizado", 'danger')
-        return redirect(url_for('login_home'))
+        try:
+            if session.get('rol') == 2:
+                resultados = Producto.consulta_prod() 
+                return render_template("usuario/consultar_prod_usu.html", datos=resultados)
+        except ProductoNoEncontradoException as pne:
+            flash(str(pne), "danger")
+            return render_template("usuario/consultar_prod_usu.html", datos=[])
+        except Exception as e:
+            flash(f"Error al acceder al menú de usuario: {str(e)}", 'danger')
+            return redirect(url_for('login_home'))
 
     #----------------------------------------
     # Página para insertar usuario
@@ -139,10 +152,7 @@ def registrar_rutas(app):
     @rol_requerido(1)
     def consulta_stock():
         usuario_id = session.get('usuario_id')
-        if not usuario_id:
-            flash("Debes iniciar sesión para ver tus productos.", "warning")
-            return redirect(url_for('login_home'))
-        
+       
         try:
             resultados = Producto.consulta_prod_por_usuario(usuario_id)
             return render_template("admin/consultar_prod_admin.html", datos=resultados)

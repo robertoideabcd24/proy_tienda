@@ -3,6 +3,9 @@
 {% block title %}Consulta de Productos{% endblock %}
 
 {% block content %}
+
+
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,6 +55,16 @@
 </head>
 <body>
     <h1>Lista de Productos</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
     
     <div class="productos">
         {% for producto in datos %}

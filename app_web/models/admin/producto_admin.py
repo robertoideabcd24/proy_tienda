@@ -55,11 +55,8 @@ class Producto:
                         'marca': fila[4],
                         'descripcion': fila[5],
                     })
-        except ProductoNoEncontradoException as e:
-            raise ProductoNoEncontradoException("No se encontraron productos para este usuario")
-        except Exception as e:
-            raise e
-
+        except ProductoNoEncontradoException:
+            raise
         return resultados
     
     @staticmethod
