@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="mb-4">
+    <a href="{{ url_for('consulta_productos') }}" class="btn-regresar">
+        <i class="fas fa-arrow-left"></i> Volver al Catálogo
+    </a>
+</div>
+
+<h2 class="titulo-compras">🛒 Tus Compras</h2>
+
+{% if compras %}
+  <table class="carrito-table">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Producto</th>
+        <th>Descripción</th>
+        <th>Talla</th>
+        <th>Color</th>
+        <th>Cantidad</th>
+        <th>Precio Original</th>
+        <th>Descuento</th>
+        <th>Precio Final</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for compra in compras %}
+      <tr>
+        <td>{{ compra.fecha.strftime('%d/%m/%Y') if compra.fecha else '-' }}</td>
+        <td>{{ compra.nombre }}</td>
+        <td>{{ compra.descripcion }}</td>
+        <td>{{ compra.talla }}</td>
+        <td>{{ compra.color }}</td>
+        <td>{{ compra.cantidad }}</td>
+        <td>${{ "%.2f"|format(compra.precio_original) }}</td>
+        <td>
+          {% set descuento = ((compra.precio_original - compra.precio_final) / compra.precio_original * 100) | round %}
+          <span class="badge-descuento">{{ descuento }}%</span>
+        </td>
+        <td>${{ "%.2f"|format(compra.precio_final) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p class="mensaje-vacio">No has realizado ninguna compra aún.</p>
+{% endif %}
+{% endblock %}
+
+{% block styles %}
+<style>
+  .btn-regresar {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+  }
+
+  .btn-regresar:hover {
+    background-color: #2563eb;
+  }
+
+  .titulo-compras {
+    text-align: center;
+    margin: 20px 0 30px;
+    color: #1f2937;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .carrito-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Segoe UI', sans-serif;
+    margin-bottom: 40px;
+  }
+
+  .carrito-table th {
+    background-color: #111827;
+    color: white;
+    padding: 12px;
+  }
+
+  .carrito-table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+
+  .carrito-table tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+  }
+
+  .badge-descuento {
+    display: inline-block;
+    background-color: #22c55e;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 0.9em;
+  }
+
+  .mensaje-vacio {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 1.1em;
+    color: #6b7280;
+  }
+
+  @media (max-width: 768px) {
+    .carrito-table th, .carrito-table td {
+      font-size: 0.85em;
+      padding: 8px;
+    }
+
+    .btn-regresar {
+      padding: 8px 16px;
+      font-size: 0.9em;
+    }
+  }
+</style>
+{% endblock %}
