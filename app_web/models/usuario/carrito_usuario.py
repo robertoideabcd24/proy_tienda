@@ -1,8 +1,8 @@
 from ...extension import pgdb
-from models.admin.producto_admin import Producto
+from ...models.admin.producto_admin import Producto
 from decimal import Decimal
+from ...models.usuario.compras import Compra
 
-from models.usuario.compras import Compra
 
 class Carrito:
     @staticmethod
