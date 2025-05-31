@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from functools import wraps
 from .models.admin.producto_admin import Producto
-from models.usuario.carrito_usuario import Carrito
+from .models.usuario.carrito_usuario import Carrito
 from .extension import pgdb  # tu instancia de PostgresDB
 from .models.usuario.compras import Compra
 
@@ -204,4 +204,4 @@ def registrar_rutas_usuario(app):
         compras = Compra.obtener_compras_usuario(usuario_id)  # <- Este método debes tenerlo definido
         return render_template('usuario/ver_compras.html', compras=compras)
 
-print("Prueba funcionado")
+print("hola")

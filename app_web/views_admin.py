@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, session, flash
 from functools import wraps
-from models.admin.usuario_admin import Usuario, UsuarioException
+from .models.admin.usuario_admin import Usuario, UsuarioException
 from .models.admin.producto_admin import Producto, AltaProductoException, AltaProductoPrecioException, AltaProductoDescripcionException, ProductoNoEncontradoException,ProductoDetalleException
 from .extension import pgdb
 
@@ -394,4 +394,3 @@ def registrar_rutas(app):
      #----------------------------------------
     # Página de la consulta de productos
     #----------------------------------------
-

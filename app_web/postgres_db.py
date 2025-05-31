@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 db_config = { "host" : "localhost",
                 "database" : "sistema_tienda",
-                "user" : "uacm2",
+                "user" : "uacm",
                 "password" : "uacm1"}
 
 _tabla_productos = "CREATE TABLE productos (" \
