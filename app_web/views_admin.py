@@ -48,7 +48,7 @@ def registrar_rutas(app):
                     session['usuario_id'] = usuario['id']
 
                     if usuario['rol'] == 1:
-                        return redirect(url_for('menu_admin'))
+                        return redirect(url_for('consulta_stock'))
                     elif usuario['rol'] == 2:
                         return redirect(url_for('consulta_productos'))
                     else:
@@ -68,14 +68,14 @@ def registrar_rutas(app):
 
     #----------------------------------------
     #roles 
-    @app.route('/menu_admin')
-    @rol_requerido(1)
-    def menu_admin():
-        try:
-            return render_template('admin/menu_admin.html')
-        except Exception as e:
-            flash(f"Error al acceder al menú de administrador: {str(e)}", 'danger')
-            return redirect(url_for('login_home'))
+    # @app.route('/menu_admin')
+    # @rol_requerido(1)
+    # def menu_admin():
+    #     try:
+    #         return render_template('admin/menu_admin.html')
+    #     except Exception as e:
+    #         flash(f"Error al acceder al menú de administrador: {str(e)}", 'danger')
+    #         return redirect(url_for('login_home'))
 
     # @app.route('/menu_usuario')
     # #@rol_requerido(2)

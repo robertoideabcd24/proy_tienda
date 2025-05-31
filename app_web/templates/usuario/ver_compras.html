@@ -1,134 +1,179 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
 
-<div class="mb-4">
-    <a href="{{ url_for('consulta_productos') }}" class="btn-regresar">
-        <i class="fas fa-arrow-left"></i> Volver al Catálogo
+<div class="container py-4">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="mb-3">
+    <a href="{{ url_for('consulta_productos') }}" class="btn btn-primary">
+      <i class="fas fa-arrow-left me-2"></i>Volver al Catálogo
     </a>
+  </div>
+
+<h2 class="text-center mb-4">
+  <i class="fas fa-box me-2"></i>Mis Compras
+</h2>
+
+
+
+
+  {% if compras %}
+    <div class="compras-container">
+      <table class="compras-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th>Descripción</th>
+            <th>Talla</th>
+            <th>Color</th>
+            <th>Cantidad</th>
+            <th>Precio Original</th>
+            <th>Descuento</th>
+            <th>Precio Final</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for compra in compras %}
+          <tr>
+            <td>{{ compra.fecha.strftime('%d/%m/%Y') if compra.fecha else '-' }}</td>
+            <td><strong>{{ compra.nombre }}</strong></td>
+            <td class="small">{{ compra.descripcion }}</td>
+            <td>{{ compra.talla }}</td>
+            <td>{{ compra.color }}</td>
+            <td>{{ compra.cantidad }}</td>
+            <td>${{ "%.2f"|format(compra.precio_original) }}</td>
+            <td>
+              {% set descuento = ((compra.precio_original - compra.precio_final) / compra.precio_original * 100) | round %}
+              {% if descuento > 0 %}
+              <span class="descuento-badge">{{ descuento }}%</span>
+              {% else %}
+              -
+              {% endif %}
+            </td>
+            <td>
+              {% if descuento > 0 %}
+                <span class="precio-tachado">${{ "%.2f"|format(compra.precio_original) }}</span><br>
+                <span class="precio-descuento">${{ "%.2f"|format(compra.precio_final) }}</span>
+              {% else %}
+                ${{ "%.2f"|format(compra.precio_final) }}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="carrito-vacio">
+      <p>No has realizado ninguna compra aún.</p>
+      <a href="{{ url_for('consulta_productos') }}" class="btn-explorar">
+        Explorar productos
+      </a>
+    </div>
+  {% endif %}
+
 </div>
 
-<h2 class="titulo-compras">🛒 Tus Compras</h2>
-
-{% if compras %}
-  <table class="carrito-table">
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Producto</th>
-        <th>Descripción</th>
-        <th>Talla</th>
-        <th>Color</th>
-        <th>Cantidad</th>
-        <th>Precio Original</th>
-        <th>Descuento</th>
-        <th>Precio Final</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for compra in compras %}
-      <tr>
-        <td>{{ compra.fecha.strftime('%d/%m/%Y') if compra.fecha else '-' }}</td>
-        <td>{{ compra.nombre }}</td>
-        <td>{{ compra.descripcion }}</td>
-        <td>{{ compra.talla }}</td>
-        <td>{{ compra.color }}</td>
-        <td>{{ compra.cantidad }}</td>
-        <td>${{ "%.2f"|format(compra.precio_original) }}</td>
-        <td>
-          {% set descuento = ((compra.precio_original - compra.precio_final) / compra.precio_original * 100) | round %}
-          <span class="badge-descuento">{{ descuento }}%</span>
-        </td>
-        <td>${{ "%.2f"|format(compra.precio_final) }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <p class="mensaje-vacio">No has realizado ninguna compra aún.</p>
-{% endif %}
-{% endblock %}
-
-{% block styles %}
 <style>
-  .btn-regresar {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #3b82f6;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
-    font-weight: bold;
-  }
+.compras-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
 
-  .btn-regresar:hover {
-    background-color: #2563eb;
-  }
-
-  .titulo-compras {
-    text-align: center;
-    margin: 20px 0 30px;
-    color: #1f2937;
-    font-family: 'Segoe UI', sans-serif;
-  }
-
-  .carrito-table {
+.compras-table {
     width: 100%;
     border-collapse: collapse;
-    font-family: 'Segoe UI', sans-serif;
-    margin-bottom: 40px;
-  }
+    margin-bottom: 30px;
+}
 
-  .carrito-table th {
-    background-color: #111827;
+.compras-table th {
+    background-color: #7B9FD5;
     color: white;
-    padding: 12px;
-  }
-
-  .carrito-table td {
-    padding: 10px;
+    padding: 12px 15px;
     text-align: center;
+}
+
+.compras-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.compras-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Reutilizamos los estilos del carrito */
+.carrito-vacio {
+    text-align: center;
+    padding: 40px;
     border: 1px solid #ddd;
-  }
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-top: 20px;
+}
 
-  .carrito-table tbody tr:nth-child(even) {
-    background-color: #f9fafb;
-  }
+.carrito-vacio p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
 
-  .badge-descuento {
+.btn-explorar {
     display: inline-block;
-    background-color: #22c55e;
+    padding: 10px 20px;
+    background-color: #7B9FD5;
     color: white;
-    padding: 4px 8px;
-    border-radius: 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.btn-explorar:hover {
+    background-color: #6a8fc1;
+}
+
+.small {
     font-size: 0.9em;
-  }
+    color: #666;
+}
 
-  .mensaje-vacio {
-    text-align: center;
-    margin-top: 30px;
-    font-size: 1.1em;
-    color: #6b7280;
-  }
+/* Nuevos estilos comunes */
+.descuento-badge {
+    background-color: #28a745;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
 
-  @media (max-width: 768px) {
-    .carrito-table th, .carrito-table td {
-      font-size: 0.85em;
-      padding: 8px;
-    }
+.precio-tachado {
+    text-decoration: line-through;
+    color: #6c757d;
+    font-size: 0.9em;
+}
 
-    .btn-regresar {
-      padding: 8px 16px;
-      font-size: 0.9em;
-    }
-  }
+.precio-descuento {
+    color: #28a745;
+    font-weight: bold;
+}
 </style>
+
 {% endblock %}
