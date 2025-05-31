@@ -304,3 +304,33 @@ class Producto:
         except Exception as e:
             print("Error al obtener detalles del producto:", e)
             raise ProductoDetalleException("Error al obtener detalles del producto") from e
+        
+    @staticmethod
+    def actualizar_stock(producto_id, talla, color, cantidad_a_restar):
+        try:
+            with pgdb.get_cursor() as cursor:
+                # Primero obtener el stock actual
+                cursor.execute("""
+                    SELECT stock FROM producto_detalles 
+                    WHERE producto_id = %s AND talla = %s AND color = %s
+                """, (producto_id, talla, color))
+                resultado = cursor.fetchone()
+                if not resultado:
+                    return False, "Detalle no encontrado"
+
+                stock_actual = resultado[0]
+                if stock_actual < cantidad_a_restar:
+                    return False, "Stock insuficiente"
+
+                # Actualizar stock restando la cantidad
+                nuevo_stock = stock_actual - cantidad_a_restar
+                cursor.execute("""
+                    UPDATE producto_detalles 
+                    SET stock = %s 
+                    WHERE producto_id = %s AND talla = %s AND color = %s
+                """, (nuevo_stock, producto_id, talla, color))
+            return True, "Stock actualizado"
+        except Exception as e:
+            return False, f"Error al actualizar stock: {e}"
+
+        

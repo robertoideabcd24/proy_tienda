@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="mb-4">
+    <a href="{{ url_for('consulta_productos') }}" class="btn-regresar">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<h2>Tu Carrito de Compras</h2>
+
+{% if carrito %}
+    <div class="carrito-container">
+        <table class="carrito-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Detalles</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Descuento</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in carrito %}
+                <tr>
+                    <td>
+                        <strong>{{ item.nombre }}</strong>
+                        <p class="small">{{ item.descripcion }}</p>
+                    </td>
+                    <td>
+                        <span class="detalle">Talla: {{ item.talla }}</span><br>
+                        <span class="detalle">Color: {{ item.color }}</span>
+                    </td>
+                    <td>
+                        {% if item.descuento_porcentaje > 0 %}
+                            <span class="precio-tachado">${{ item.precio_original | round(2) }}</span><br>
+                            <span class="precio-descuento">${{ item.precio_final | round(2) }}</span>
+                        {% else %}
+                            ${{ item.precio_original | round(2) }}
+                        {% endif %}
+                    </td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>
+                        {% if item.descuento_porcentaje > 0 %}
+                            <span class="descuento-badge">{{ item.descuento_porcentaje }}%</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>${{ item.subtotal | round(2) }}</td>
+                    <td>
+                        <form action="{{ url_for('eliminar_del_carrito') }}" method="POST" style="display:inline;">
+                            <input type="hidden" name="producto_id" value="{{ item.producto_id }}">
+                            <input type="hidden" name="talla" value="{{ item.talla }}">
+                            <input type="hidden" name="color" value="{{ item.color }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" class="text-right"><strong>Total:</strong></td>
+                    <td><strong>${{ total | round(2) }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+        
+        <div class="pagar-container">
+            <form action="{{ url_for('pagar_carrito') }}" method="POST">
+                <button type="submit" class="btn-pagar">
+                    <i class="fas fa-lock"></i> Pagar ahora
+                </button>
+            </form>
+        </div>
+    </div>
+{% else %}
+    <div class="carrito-vacio">
+        <p>Tu carrito está vacío.</p>
+        <p>¡Explora nuestros productos y agrega algo especial!</p>
+        <a href="{{ url_for('consulta_productos') }}" class="btn-explorar">
+            Explorar productos
+        </a>
+    </div>
+{% endif %}
+
+<style>
+.alert {
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeOut 0.5s ease forwards;
+    animation-delay: 1s;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.carrito-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.carrito-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.carrito-table th {
+    background-color: #7B9FD5;
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.carrito-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.carrito-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.carrito-table tfoot td {
+    padding: 15px;
+    font-size: 18px;
+    background-color: #f8f9fa;
+}
+
+.detalle {
+    display: block;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.pagar-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.carrito-vacio {
+    text-align: center;
+    padding: 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-top: 20px;
+}
+
+.carrito-vacio p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.btn-explorar {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #7B9FD5;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.btn-explorar:hover {
+    background-color: #6a8fc1;
+}
+
+.btn-pagar {
+    display: inline-block;
+    padding: 15px 40px;
+    background: linear-gradient(to right, #28a745, #218838);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-pagar:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4);
+}
+
+.btn-pagar i {
+    margin-right: 10px;
+}
+
+.small {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* NUEVOS ESTILOS PARA DESCUENTO */
+.descuento-badge {
+    background-color: #28a745;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.precio-tachado {
+    text-decoration: line-through;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.precio-descuento {
+    color: #28a745;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
