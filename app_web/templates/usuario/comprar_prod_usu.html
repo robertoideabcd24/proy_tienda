@@ -47,7 +47,7 @@
                             <td style="border: 1px solid #ddd; padding: 8px;">{{ detalle[1] }}</td>
                             <td style="border: 1px solid #ddd; padding: 8px;">{{ detalle[2] }}</td>
                             <td style="border: 1px solid #ddd; padding: 8px;">
-                                <input type="number" name="cantidad_{{ loop.index0 }}" min="1" max="{{ detalle[2] }}"  value="1" style="width: 60px;">
+                                <input type="number" name="cantidad_{{ loop.index0 }}" min="0" max="{{ detalle[2] }}"  value="1" style="width: 60px;">
                             </td>
                         </tr>
                         {% endfor %}
