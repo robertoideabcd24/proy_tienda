@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from functools import wraps
 from .models.admin.producto_admin import Producto
-from .models.usuario.carrito_usuario import Carrito
+from models.usuario.carrito_usuario import Carrito
 from .extension import pgdb  # tu instancia de PostgresDB
 from .models.usuario.compras import Compra
 
