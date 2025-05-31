@@ -3,85 +3,98 @@
 {% block title %}Detalles del Producto - {{ producto_nombre }}{% endblock %}
 
 {% block content %}
-<div class="row d-flex" style="gap: 40px; flex-wrap: wrap;">
+<div class="container my-5">
 
-    <!-- Botón de regreso -->
-    <div class="mb-4">
-        <a href="{{ url_for('consulta_stock') }}" class="btn-regresar">
-            <i class="fas fa-arrow-left"></i> Volver
-        </a>
+  <!-- Botón de regreso -->
+  <div class="mb-3">
+    <a href="{{ url_for('consulta_stock') }}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+  </div>
+
+  <!-- Mensajes flash -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Título principal -->
+  <div class="text-center mb-5">
+    <h2 class="fw-bold text-primary">Detalles del Producto</h2>
+    <h4 class="text-muted">{{ producto_nombre }}</h4>
+  </div>
+
+  <div class="row justify-content-center g-4">
+
+    <!-- Formulario para agregar detalles -->
+    <div class="col-md-4">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center">
+          <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Agregar Detalles</h5>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            <div class="mb-3">
+              <label for="talla" class="form-label">Talla</label>
+              <input type="number" id="talla" name="talla" min="0" required class="form-control">
+            </div>
+            <div class="mb-3">
+              <label for="color" class="form-label">Color</label>
+              <input type="text" id="color" name="color" required class="form-control">
+            </div>
+            <div class="mb-4">
+              <label for="stock" class="form-label">Stock</label>
+              <input type="number" id="stock" name="stock" min="0" required class="form-control">
+            </div>
+            <button type="submit" class="btn btn-success w-100">
+              <i class="fas fa-save me-2"></i>Guardar Detalles
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 
-    <!-- Encabezado -->
-    <div class="text-center mb-4">
-        <h2>Detalles del Producto</h2>
-        <h3 class="text-muted">{{ producto_nombre }}</h3>
+    <!-- Tabla de detalles existentes -->
+    <div class="col-md-8">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center">
+          <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Detalles Existentes</h5>
+        </div>
+        <div class="card-body">
+          {% if producto_detalles %}
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle mb-0">
+                <thead class="table-primary text-center">
+                  <tr>
+                    <th>Talla</th>
+                    <th>Color</th>
+                    <th>Stock</th>
+                  </tr>
+                </thead>
+                <tbody class="text-center">
+                  {% for detalle in producto_detalles %}
+                  <tr>
+                    <td>{{ detalle[0] }}</td>
+                    <td>{{ detalle[1] }}</td>
+                    <td>{{ detalle[2] }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted text-center mb-0">No hay detalles registrados para este producto.</p>
+          {% endif %}
+        </div>
+      </div>
     </div>
 
-    <!-- Contenido principal -->
-    <div class="row">
-        <!-- Formulario -->
-        <form method="POST" style="border: 1px solid #ccc; padding: 30px; border-radius: 10px; background-color: #f9f9f9; width: 300px; margin-bottom: 40px;">
-        <h3 style="text-align: center;"><i class="fas fa-plus-circle me-2"></i>Agregar Detalles</h3>
-        
-        <div style="margin-bottom: 15px;">
-            <label for="talla">Talla:</label>
-            <input type="number" id="talla" name="talla" min="0" required style="width: 100%; padding: 8px;">
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label for="color">Color:</label>
-            <input type="text" id="color" name="color" required style="width: 100%; padding: 8px;">
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label for="stock">Stock:</label>
-            <input type="number" id="stock" name="stock" min="0" required style="width: 100%; padding: 8px;">
-        </div>
-
-        <button type="submit" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 5px;">
-            <i class="fas fa-save me-2"></i>Guardar Detalles
-        </button>
-        </form>
-
-        <!-- Lista de detalles con tabla -->
-        <div class="details-container" style="flex: 1; min-width: 300px;">
-            <h3 class="details-title"><i class="fas fa-list-alt me-2"></i>Detalles Existentes</h3>
-
-            {% if producto_detalles %}
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background-color: #f2f2f2;">
-                            <th style="padding: 8px; border: 1px solid #ddd;">Talla</th>
-                            <th style="padding: 8px; border: 1px solid #ddd;">Color</th>
-                            <th style="padding: 8px; border: 1px solid #ddd;">Stock</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for detalle in producto_detalles %}
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ detalle[0] }}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ detalle[1] }}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ detalle[2] }}</td>
-                            
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No hay detalles registrados para este producto.</p>
-            {% endif %}
-        </div>
-    </div>
+  </div>
 </div>
-{% endblock %}
-
-{% block styles %}
 {% endblock %}

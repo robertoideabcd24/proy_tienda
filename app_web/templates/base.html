@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Tienda Online{% endblock %}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     /* Estructura base del layout */
     html, body {
@@ -140,7 +141,7 @@
         <button onclick="window.location.href='/ver_compras'">Compras</button>
 
         {% if session.rol == 1 %}
-          <button onclick="window.location.href='/menu_admin'">Productos</button>
+          <button onclick="window.location.href='/consulta_stock'">Productos</button>
         {% endif %}
         
         {% if session.usuario %}
