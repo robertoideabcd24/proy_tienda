@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Producto {{ producto.desc }}{% endblock %}
+{% block title %}Producto {{ producto.nombre }}{% endblock %}
 
 {% block content %}
+
 <div class="regresar-btn">
-        <a href="{{ url_for('consulta_productos') }}" class="btn-regresar">Volver</a>
+    <a href="{{ url_for('consulta_productos') }}" class="btn-regresar">Volver</a>
 </div>
+
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
@@ -15,31 +17,106 @@
 {% endwith %}
 
 <div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
-    <!-- Contenedor principal con dos columnas -->
     <div style="display: flex; border: 1px solid #ccc; padding: 20px; border-radius: 10px; background-color: #f4f4f4;">
 
         <!-- Info del producto -->
         <div style="margin-right: 40px; text-align: center;">
-            <h1>{{ producto.desc }}</h1>
-            <p><strong>Nombre:</strong> {{ producto.nombre }}</p>
-            <p><strong>Disponible:</strong> {{ producto.disponible }}</p>
+            <h1>{{ producto.nombre }}</h1>
+            <p><strong>Disponible:</strong> {{ 'Sí' if producto.disponible else 'No' }}</p>
             <p><strong>Marca:</strong> {{ producto.marca }}</p>
-            <p><strong>Descripcion:</strong> {{ producto.descripcion }}</p>
+            <p><strong>Descripción:</strong> {{ producto.descripcion }}</p>
             <p><strong>Precio:</strong> ${{ producto.precio }}</p>
-        </div>
 
-        <!-- Botones de acción -->
-        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 1px solid #ccc; padding-left: 40px;">
-            
-                <button style="padding: 10px 20px; margin-bottom: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    Comprar
-                </button>
-                <button style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    Agregar al carrito
-                </button>
-            
-        </div>
+            <form action="{{ url_for('agregar_carrito', producto_id=producto.id) }}" method="post" style="margin-top: 20px;">
+                <h3>Detalles:</h3>
+                {% if detalles %}
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <th></th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Talla</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Color</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Stock</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Cantidad</th>
+                        </tr>
+                        {% for detalle in detalles %}
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
+                                <input type="radio" name="detalle_seleccionado" value="{{ loop.index0 }}">
+                            </td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ detalle[0] }}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ detalle[1] }}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ detalle[2] }}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">
+                                <input type="number" name="cantidad_{{ loop.index0 }}" min="1" max="{{ detalle[2] }}"  value="1" style="width: 60px;">
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
 
+                    <div style="margin-top: 20px;">
+                        <button type="submit" name="accion" value="agregar" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Agregar al carrito
+                        </button>
+                        <button type="submit" name="accion" value="comprar" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Comprar
+                        </button>
+                    </div>
+                {% else %}
+                    <p>No hay detalles disponibles para este producto.</p>
+                {% endif %}
+            </form>
+        </div>
     </div>
 </div>
+
+<style>
+.alert {
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+
+    /* Animación para que desaparezca */
+    animation: fadeOut 0.5s ease forwards;
+    animation-delay: 1.5s; /* espera 1 segundo antes de empezar */
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* Colores por tipo */
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+</style>
+
 {% endblock %}
