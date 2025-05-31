@@ -66,31 +66,7 @@ def registrar_rutas(app):
 
         return render_template('login.html')
 
-    #----------------------------------------
-    #roles 
-    # @app.route('/menu_admin')
-    # @rol_requerido(1)
-    # def menu_admin():
-    #     try:
-    #         return render_template('admin/menu_admin.html')
-    #     except Exception as e:
-    #         flash(f"Error al acceder al menú de administrador: {str(e)}", 'danger')
-    #         return redirect(url_for('login_home'))
-
-    # @app.route('/menu_usuario')
-    # #@rol_requerido(2)
-    # def menu_usuario():
-    #     try:
-    #         if session.get('rol') == 2:
-    #             resultados = Producto.consulta_prod() 
-    #             return render_template("usuario/consultar_prod_usu.html", datos=resultados)
-    #     except ProductoNoEncontradoException as pne:
-    #         flash(str(pne), "danger")
-    #         return render_template("usuario/consultar_prod_usu.html", datos=[])
-    #     except Exception as e:
-    #         flash(f"Error al acceder al menú de usuario: {str(e)}", 'danger')
-    #         return redirect(url_for('login_home'))
-
+ 
     #----------------------------------------
     # Página para insertar usuario
     #----------------------------------------

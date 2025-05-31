@@ -36,7 +36,7 @@ def test_consulta_productos_sin_productos(client):
     # Verifica que no hay mensajes de error flash
     assert not get_flashed_messages()
     # Verifica que se muestra el contenedor de productos
-    assert b'class="productos"' in response.data
+    assert b'row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4' in response.data
 
 def test_login_get(client):
     """Prueba el acceso GET a la página de login"""
@@ -60,16 +60,16 @@ def test_login_post_invalid(client):
     assert len(messages) > 0
     assert "Credenciales incorrectas" in messages[0]
 
-def test_menu_admin_no_auth(client):
-    """Prueba acceso no autorizado a menu_admin"""
-    response = client.get('/menu_admin', follow_redirects=True)
-    assert response.status_code == 200
-    # Verifica que fue redirigido a la página de login
-    assert b"Iniciar sesi\xc3\xb3n" in response.data
-    # Verifica el mensaje flash
-    messages = get_flashed_messages()
-    assert len(messages) > 0
-    assert "Acceso no autorizado" in messages[0]
+# def test_menu_admin_no_auth(client):
+#     """Prueba acceso no autorizado a menu_admin"""
+#     response = client.get('/menu_admin', follow_redirects=True)
+#     assert response.status_code == 200
+#     # Verifica que fue redirigido a la página de login
+#     assert b"Iniciar sesi\xc3\xb3n" in response.data
+#     # Verifica el mensaje flash
+#     messages = get_flashed_messages()
+#     assert len(messages) > 0
+#     assert "Acceso no autorizado" in messages[0]
 
 
 @pytest.fixture
@@ -79,13 +79,13 @@ def admin_session(client):
         sess['usuario'] = 'admin'
     yield client
 
-def test_menu_admin_auth(admin_session):
-    response = admin_session.get('/menu_admin')
-    html = response.data.decode('utf-8').lower()
-    assert response.status_code == 200
-    assert "menú administrador" in html
-    assert "consultar productos" in html
-    assert "insertar producto" in html
+# def test_menu_admin_auth(admin_session):
+#     response = admin_session.get('/menu_admin')
+#     html = response.data.decode('utf-8').lower()
+#     assert response.status_code == 200
+#     assert "menú administrador" in html
+#     assert "consultar productos" in html
+#     assert "insertar producto" in html
 
 # def test_menu_usuario_no_auth(client):
 #     """Prueba acceso no autorizado a menu_usuario"""
@@ -541,7 +541,7 @@ def test_perfil_usuario_con_sesion(client):
     # Verificamos los datos en el contenido renderizado
     assert b'Juan Perez' in response.data
     assert b'juan@example.com' in response.data
-    assert b'Perfil del Usuario' in response.data
+    assert b'Mi Perfil' in response.data
 
 def test_perfil_usuario_sin_sesion(client):
     """Prueba acceso a perfil cuando NO hay usuario en sesión"""
