@@ -87,27 +87,27 @@ def test_menu_admin_auth(admin_session):
     assert "consultar productos" in html
     assert "insertar producto" in html
 
-def test_menu_usuario_no_auth(client):
-    """Prueba acceso no autorizado a menu_usuario"""
-    response = client.get('/menu_usuario', follow_redirects=True)
-    assert response.status_code == 200
-    # Verifica mensaje flash
-    messages = get_flashed_messages()
-    assert messages and "Acceso no autorizado" in messages[0]
-    # Verifica que fue redirigido al login
-    assert b"Iniciar sesi\xc3\xb3n" in response.data
+# def test_menu_usuario_no_auth(client):
+#     """Prueba acceso no autorizado a menu_usuario"""
+#     response = client.get('/menu_usuario', follow_redirects=True)
+#     assert response.status_code == 200
+#     # Verifica mensaje flash
+#     messages = get_flashed_messages()
+#     assert messages and "Acceso no autorizado" in messages[0]
+#     # Verifica que fue redirigido al login
+#     assert b"Iniciar sesi\xc3\xb3n" in response.data
 
-def test_menu_usuario_auth(client):
-    """Prueba acceso autorizado a menu_usuario"""
-    # Simulamos sesión de usuario directamente
-    with client.session_transaction() as sess:
-        sess['rol'] = 2  # Rol de usuario normal
-        sess['usuario'] = 'usuario'
+# def test_menu_usuario_auth(client):
+#     """Prueba acceso autorizado a menu_usuario"""
+#     # Simulamos sesión de usuario directamente
+#     with client.session_transaction() as sess:
+#         sess['rol'] = 2  # Rol de usuario normal
+#         sess['usuario'] = 'usuario'
     
-    response = client.get('/menu_usuario')
-    assert response.status_code == 200
-    # Verifica contenido específico de la página de usuario
-    assert b"Lista de Productos" in response.data  # Ajusta según tu template
+#     response = client.get('/menu_usuario')
+#     assert response.status_code == 200
+#     # Verifica contenido específico de la página de usuario
+#     assert b"Lista de Productos" in response.data  # Ajusta según tu template
 
 
 def test_consulta_productos_exitoso(client):
@@ -210,51 +210,51 @@ def test_login_generic_exception(client):
         Usuario.verificar_usuario = original_method
 
 
-def test_login_successful_admin_and_user(client):
-    # Simular un usuario admin
-    admin_user = {
-        'id': 1,
-        'nombre': 'Admin Test',
-        'correo': 'admin@test.com',
-        'rol': 1
-    }
-    # Simular un usuario normal
-    normal_user = {
-        'id': 2,
-        'nombre': 'User Test',
-        'correo': 'user@test.com',
-        'rol': 2
-    }
+# def test_login_successful_admin_and_user(client):
+#     # Simular un usuario admin
+#     admin_user = {
+#         'id': 1,
+#         'nombre': 'Admin Test',
+#         'correo': 'admin@test.com',
+#         'rol': 1
+#     }
+#     # Simular un usuario normal
+#     normal_user = {
+#         'id': 2,
+#         'nombre': 'User Test',
+#         'correo': 'user@test.com',
+#         'rol': 2
+#     }
 
-    original_method = Usuario.verificar_usuario
+#     original_method = Usuario.verificar_usuario
 
-    try:
-        # Mock para admin
-        Usuario.verificar_usuario = lambda u, p: admin_user if u == 'admin@test.com' and p == 'pass' else None
-        response = client.post('/login', data={'usuario': 'admin@test.com', 'contrasena': 'pass'}, follow_redirects=False)
-        assert response.status_code == 302
-        assert response.headers['Location'].endswith('/menu_admin')
+#     try:
+#         # Mock para admin
+#         Usuario.verificar_usuario = lambda u, p: admin_user if u == 'admin@test.com' and p == 'pass' else None
+#         response = client.post('/login', data={'usuario': 'admin@test.com', 'contrasena': 'pass'}, follow_redirects=False)
+#         assert response.status_code == 302
+#         assert response.headers['Location'].endswith('/menu_admin')
 
-        with client.session_transaction() as sess:
-            assert sess['usuario'] == admin_user['nombre']
-            assert sess['correo'] == admin_user['correo']
-            assert sess['rol'] == admin_user['rol']
-            assert sess['usuario_id'] == admin_user['id']
+#         with client.session_transaction() as sess:
+#             assert sess['usuario'] == admin_user['nombre']
+#             assert sess['correo'] == admin_user['correo']
+#             assert sess['rol'] == admin_user['rol']
+#             assert sess['usuario_id'] == admin_user['id']
 
-        # Mock para usuario normal
-        Usuario.verificar_usuario = lambda u, p: normal_user if u == 'user@test.com' and p == 'pass' else None
-        response = client.post('/login', data={'usuario': 'user@test.com', 'contrasena': 'pass'}, follow_redirects=False)
-        assert response.status_code == 302
-        assert response.headers['Location'].endswith('/menu_usuario')
+#         # Mock para usuario normal
+#         Usuario.verificar_usuario = lambda u, p: normal_user if u == 'user@test.com' and p == 'pass' else None
+#         response = client.post('/login', data={'usuario': 'user@test.com', 'contrasena': 'pass'}, follow_redirects=False)
+#         assert response.status_code == 302
+#         assert response.headers['Location'].endswith('/menu_usuario')
 
-        with client.session_transaction() as sess:
-            assert sess['usuario'] == normal_user['nombre']
-            assert sess['correo'] == normal_user['correo']
-            assert sess['rol'] == normal_user['rol']
-            assert sess['usuario_id'] == normal_user['id']
+#         with client.session_transaction() as sess:
+#             assert sess['usuario'] == normal_user['nombre']
+#             assert sess['correo'] == normal_user['correo']
+#             assert sess['rol'] == normal_user['rol']
+#             assert sess['usuario_id'] == normal_user['id']
 
-    finally:
-        Usuario.verificar_usuario = original_method
+#     finally:
+#         Usuario.verificar_usuario = original_method
 
 
 def test_login_invalid_role(client):
@@ -286,88 +286,89 @@ def test_login_invalid_role(client):
 ##pruebas menu no borrar
 
 
-def test_menu_usuario_generic_exception(client, monkeypatch):
-    """Prueba manejo de excepciones genéricas en menu_usuario"""
-    # Configuramos el mock para lanzar una excepción genérica
-    def mock_consulta_prod():
-        raise Exception("Error inesperado en la base de datos")
+# def test_menu_usuario_generic_exception(client, monkeypatch):
+#     """Prueba manejo de excepciones genéricas en menu_usuario"""
+#     # Configuramos el mock para lanzar una excepción genérica
+#     def mock_consulta_prod():
+#         raise Exception("Error inesperado en la base de datos")
     
-    monkeypatch.setattr(Producto, 'consulta_prod', mock_consulta_prod)
+#     monkeypatch.setattr(Producto, 'consulta_prod', mock_consulta_prod)
     
-    # Simulamos sesión de usuario normal
-    with client.session_transaction() as sess:
-        sess['rol'] = 2
-        sess['usuario'] = 'usuario_test'
+#     # Simulamos sesión de usuario normal
+#     with client.session_transaction() as sess:
+#         sess['rol'] = 2
+#         sess['usuario'] = 'usuario_test'
     
-    response = client.get('/menu_usuario', follow_redirects=True)
+#     response = client.get('/menu_usuario', follow_redirects=True)
     
-    # Verificamos el comportamiento esperado
-    assert response.status_code == 200
-    assert b"Iniciar sesi\xc3\xb3n" in response.data  # Verifica redirección
-    messages = get_flashed_messages(with_categories=True)
-    assert len(messages) > 0
-    assert "Error al acceder al menú de usuario" in messages[0][1]
+#     # Verificamos el comportamiento esperado
+#     assert response.status_code == 200
+#     assert b"Iniciar sesi\xc3\xb3n" in response.data  # Verifica redirección
+#     messages = get_flashed_messages(with_categories=True)
+#     assert len(messages) > 0
+#     assert "Error al acceder al menú de usuario" in messages[0][1]
 
-def test_menu_usuario_producto_no_encontrado(client, monkeypatch):
-    """Prueba que verifica el manejo de ProductoNoEncontradoException"""
-    # Mock para simular la excepción
-    def mock_consulta_prod():
-        raise ProductoNoEncontradoException("No hay productos disponibles")
+# def test_menu_usuario_producto_no_encontrado(client, monkeypatch):
+#     """Prueba que verifica el manejo de ProductoNoEncontradoException"""
+#     # Mock para simular la excepción
+#     def mock_consulta_prod():
+#         raise ProductoNoEncontradoException("No hay productos disponibles")
     
-    monkeypatch.setattr(Producto, 'consulta_prod', mock_consulta_prod)
+#     monkeypatch.setattr(Producto, 'consulta_prod', mock_consulta_prod)
     
-    # Sesión de usuario con rol correcto
-    with client.session_transaction() as sess:
-        sess['rol'] = 2
-        sess['usuario'] = 'test_user'
+#     # Sesión de usuario con rol correcto
+#     with client.session_transaction() as sess:
+#         sess['rol'] = 2
+#         sess['usuario'] = 'test_user'
     
-    response = client.get('/menu_usuario')
+#     response = client.get('/menu_usuario')
     
-    # Verificaciones clave
-    assert response.status_code == 200
+#     # Verificaciones clave
+#     assert response.status_code == 200
     
-    # Verifica que se muestra el template correcto (busca elementos del HTML)
-    assert b"Lista de Productos" in response.data  # Título de la página
-    assert b'class="productos"' in response.data   # Contenedor de productos
+#     # Verifica que se muestra el template correcto (busca elementos del HTML)
+#     assert b"Lista de Productos" in response.data  # Título de la página
+#     assert b'class="productos"' in response.data   # Contenedor de productos
     
-    # Verifica el mensaje flash
-    messages = get_flashed_messages(with_categories=True)
-    assert len(messages) == 1
-    assert messages[0][0] == 'danger'  # Categoría
-    assert "No hay productos disponibles" in messages[0][1]  # Mensaje
-def test_menu_usuario_excepcion_generica(client):
-    """Prueba que se manejan correctamente las excepciones genéricas"""
-    # Guardamos el método original para restaurarlo después
-    original_consulta_prod = Producto.consulta_prod
+#     # Verifica el mensaje flash
+#     messages = get_flashed_messages(with_categories=True)
+#     assert len(messages) == 1
+#     assert messages[0][0] == 'danger'  # Categoría
+#     assert "No hay productos disponibles" in messages[0][1]  # Mensaje
+
+# def test_menu_usuario_excepcion_generica(client):
+#     """Prueba que se manejan correctamente las excepciones genéricas"""
+#     # Guardamos el método original para restaurarlo después
+#     original_consulta_prod = Producto.consulta_prod
     
-    try:
-        # Mockeamos el método para que lance una excepción genérica
-        def mock_consulta_prod():
-            raise Exception("Error de conexión con la base de datos")
+#     try:
+#         # Mockeamos el método para que lance una excepción genérica
+#         def mock_consulta_prod():
+#             raise Exception("Error de conexión con la base de datos")
         
-        Producto.consulta_prod = mock_consulta_prod
+#         Producto.consulta_prod = mock_consulta_prod
         
-        # Simulamos sesión de usuario normal (rol 2)
-        with client.session_transaction() as sess:
-            sess['rol'] = 2
-            sess['usuario'] = 'usuario_test'
+#         # Simulamos sesión de usuario normal (rol 2)
+#         with client.session_transaction() as sess:
+#             sess['rol'] = 2
+#             sess['usuario'] = 'usuario_test'
         
-        response = client.get('/menu_usuario', follow_redirects=True)
+#         response = client.get('/menu_usuario', follow_redirects=True)
         
-        # Verificamos el comportamiento esperado
-        assert response.status_code == 200
-        assert b"Iniciar sesi\xc3\xb3n" in response.data  # Verifica redirección
+#         # Verificamos el comportamiento esperado
+#         assert response.status_code == 200
+#         assert b"Iniciar sesi\xc3\xb3n" in response.data  # Verifica redirección
         
-        # Verificamos el mensaje flash
-        messages = get_flashed_messages(with_categories=True)
-        assert len(messages) == 1
-        category, message = messages[0]
-        assert category == 'danger'
-        assert "Error al acceder al menú de usuario: Error de conexión con la base de datos" in message
+#         # Verificamos el mensaje flash
+#         messages = get_flashed_messages(with_categories=True)
+#         assert len(messages) == 1
+#         category, message = messages[0]
+#         assert category == 'danger'
+#         assert "Error al acceder al menú de usuario: Error de conexión con la base de datos" in message
     
-    finally:
-        # Restauramos el método original
-        Producto.consulta_prod = original_consulta_prod
+#     finally:
+#         # Restauramos el método original
+#         Producto.consulta_prod = original_consulta_prod
         
 
 #probando

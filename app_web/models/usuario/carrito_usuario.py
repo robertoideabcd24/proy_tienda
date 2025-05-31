@@ -3,8 +3,6 @@ from ..admin.producto_admin import Producto
 from decimal import Decimal
 from ..usuario.compras import Compra
 
-
-
 class Carrito:
     @staticmethod
     def obtener_por_usuario_y_producto(usuario_id, producto_id, talla, color):
@@ -59,19 +57,40 @@ class Carrito:
                 self.creado_en = resultado[1]
     @staticmethod
     def agregar_producto(usuario_id, producto_id, talla, color, cantidad):
-        item = Carrito.obtener_por_usuario_y_producto(usuario_id, producto_id, talla, color)
-        if item:
-            item.cantidad += cantidad
-            item.guardar()
-        else:
-            nuevo_item = Carrito(
-                usuario_id=usuario_id,
-                producto_id=producto_id,
-                talla=talla,
-                color=color,
-                cantidad=cantidad
-            )
-            nuevo_item.guardar()
+        try:
+            # Primero verificar stock disponible considerando reservas
+            stock_disponible = Producto.obtener_stock_disponible(producto_id, talla, color)
+            
+            # Obtener cantidad ya reservada en el carrito por este usuario
+            cantidad_en_carrito = 0
+            item_existente = Carrito.obtener_por_usuario_y_producto(usuario_id, producto_id, talla, color)
+            if item_existente:
+                cantidad_en_carrito = item_existente.cantidad
+            
+            # Calcular stock realmente disponible
+            stock_real = stock_disponible - cantidad_en_carrito
+            
+            if cantidad > stock_real:
+                raise Exception(f"No hay suficiente stock. Disponible: {stock_real}")
+            
+            # Si pasa la validación, agregar al carrito
+            if item_existente:
+                item_existente.cantidad += cantidad
+                item_existente.guardar()
+            else:
+                nuevo_item = Carrito(
+                    usuario_id=usuario_id,
+                    producto_id=producto_id,
+                    talla=talla,
+                    color=color,
+                    cantidad=cantidad
+                )
+                nuevo_item.guardar()
+                
+            return True, "Producto agregado al carrito"
+            
+        except Exception as e:
+            return False, str(e)
   
     
     # Agregar estos métodos a la clase Carrito
@@ -81,9 +100,11 @@ class Carrito:
         with pgdb.get_cursor() as cursor:
             cursor.execute("""
                 SELECT c.id, c.producto_id, p.nombre, p.descripcion, p.precio, 
-                    c.talla, c.color, c.cantidad
+                    c.talla, c.color, c.cantidad, pd.stock
                 FROM carrito c
                 JOIN productos p ON c.producto_id = p.id
+                JOIN producto_detalles pd ON c.producto_id = pd.producto_id 
+                    AND c.talla = pd.talla AND c.color = pd.color
                 WHERE c.usuario_id = %s
             """, (usuario_id,))
             items = cursor.fetchall()
@@ -92,6 +113,7 @@ class Carrito:
             for item in items:
                 precio = float(item[4])
                 cantidad = item[7]
+                stock_disponible = item[8]
                 descuento = Carrito.calcular_descuento(cantidad)
                 precio_con_descuento = precio * (1 - descuento)
                 subtotal = precio_con_descuento * cantidad
@@ -107,7 +129,9 @@ class Carrito:
                     'talla': item[5],
                     'color': item[6],
                     'cantidad': cantidad,
-                    'subtotal': subtotal
+                    'stock_disponible': stock_disponible,
+                    'subtotal': subtotal,
+                    'puede_comprar': stock_disponible >= cantidad
                 })
             return carrito
 
@@ -154,40 +178,87 @@ class Carrito:
     def procesar_pago(usuario_id):
         try:
             with pgdb.get_cursor() as cursor:
+                # Obtener todos los items del carrito con información completa
                 cursor.execute("""
-                    SELECT producto_id, talla, color, cantidad 
-                    FROM carrito 
-                    WHERE usuario_id = %s
+                    SELECT c.id, c.producto_id, p.nombre, c.talla, c.color, c.cantidad, p.precio
+                    FROM carrito c
+                    JOIN productos p ON c.producto_id = p.id
+                    WHERE c.usuario_id = %s
                 """, (usuario_id,))
                 items = cursor.fetchall()
 
+                productos_comprados = []
+                productos_sin_stock = []
+                total_compra = Decimal('0')
+
                 for item in items:
-                    producto_id, talla, color, cantidad = item
+                    item_id, producto_id, nombre, talla, color, cantidad, precio = item
+                    
+                    # Verificar stock físico real (ignorando reservas)
+                    stock_fisico = Producto.obtener_stock_fisico(producto_id, talla, color)
+                    
+                    if stock_fisico >= cantidad:
+                        # Actualizar stock
+                        exito, mensaje = Producto.actualizar_stock(producto_id, talla, color, cantidad)
+                        if not exito:
+                            productos_sin_stock.append({
+                                'nombre': nombre,
+                                'talla': talla,
+                                'color': color,
+                                'error': mensaje
+                            })
+                            continue
+                        
+                        # Calcular precio con descuento
+                        descuento = Carrito.calcular_descuento(cantidad)
+                        precio_con_descuento = Decimal(str(precio)) * (Decimal('1') - Decimal(str(descuento)))
+                        subtotal = precio_con_descuento * Decimal(str(cantidad))
+                        total_compra += subtotal
+                        
+                        # Guardar compra
+                        exito_compra, mensaje_compra = Compra.guardar_compra(
+                            usuario_id, producto_id, talla, color, cantidad, precio
+                        )
+                        
+                        if not exito_compra:
+                            productos_sin_stock.append({
+                                'nombre': nombre,
+                                'talla': talla,
+                                'color': color,
+                                'error': mensaje_compra
+                            })
+                        else:
+                            productos_comprados.append(item_id)
+                    else:
+                        productos_sin_stock.append({
+                            'nombre': nombre,
+                            'talla': talla,
+                            'color': color,
+                            'error': f"Stock insuficiente (disponible: {stock_fisico})"
+                        })
 
-                    # Obtener precio original del producto
-                    cursor.execute("""
-                        SELECT precio FROM productos WHERE id = %s
-                    """, (producto_id,))
-                    precio_original = cursor.fetchone()[0]
-                    precio_original = Decimal(precio_original)
+                # Eliminar solo los productos comprados exitosamente
+                if productos_comprados:
+                    cursor.execute("DELETE FROM carrito WHERE id IN %s", (tuple(productos_comprados),))
 
-                    # Verificar stock y actualizarlo
-                    exito, mensaje = Producto.actualizar_stock(producto_id, talla, color, cantidad)
-                    if not exito:
-                        return False, f"{mensaje} para el producto ID {producto_id}, talla '{talla}', color '{color}'"
+                # Construir mensaje de resultado
+                if productos_sin_stock and productos_comprados:
+                    mensaje = "Compra parcial realizada. "
+                    mensaje += f"Total comprado: ${total_compra:.2f}. "
+                    mensaje += "Los siguientes productos no pudieron procesarse:\n"
+                    for prod in productos_sin_stock:
+                        mensaje += f"- {prod['nombre']} (Talla: {prod['talla']}, Color: {prod['color']}): {prod['error']}\n"
+                    return False, mensaje  # False indica compra parcial
+                elif productos_sin_stock and not productos_comprados:
+                    mensaje = "No se pudo completar la compra. Problemas con los productos:\n"
+                    for prod in productos_sin_stock:
+                        mensaje += f"- {prod['nombre']} (Talla: {prod['talla']}, Color: {prod['color']}): {prod['error']}\n"
+                    return False, mensaje
+                else:
+                    return True, f"Compra realizada con éxito. Total: ${total_compra:.2f}"
 
-                    # Guardar compra (el descuento se calcula en guardar_compra)
-                    exito_compra, mensaje_compra = Compra.guardar_compra(
-                        usuario_id, producto_id, talla, color, cantidad, precio_original
-                    )
-                    if not exito_compra:
-                        return False, f"Error al guardar compra: {mensaje_compra}"
-
-                # Vaciar carrito
-                cursor.execute("DELETE FROM carrito WHERE usuario_id = %s", (usuario_id,))
-            return True, "Pago procesado correctamente"
         except Exception as e:
-            return False, str(e)
+            return False, f"Error al procesar pago: {str(e)}"
         
 
     @staticmethod

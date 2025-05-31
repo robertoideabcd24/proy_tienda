@@ -36,7 +36,7 @@ def registrar_rutas_usuario(app):
                 return redirect(url_for('comprar_producto', id=producto_id))
                 
             detalle = detalles[detalle_index]
-            talla, color, stock_disponible = detalle
+            talla, color, stock_fisico = detalle  # Cambiado a stock_fisico para claridad
 
             campo_cantidad = f'cantidad_{detalle_index}'
             cantidad = int(request.form.get(campo_cantidad, 1))
@@ -45,19 +45,28 @@ def registrar_rutas_usuario(app):
                 flash("La cantidad debe ser mayor a cero", "danger")
                 return redirect(url_for('comprar_producto', id=producto_id))
 
-            if cantidad > stock_disponible:
-                flash(f"No hay suficiente stock. Disponible: {stock_disponible}", "danger")
-                return redirect(url_for('comprar_producto', id=producto_id))
-
             # Obtener usuario_id desde la sesión
             usuario_id = session.get('usuario_id')
             if not usuario_id:
                 flash("Usuario no autenticado", "danger")
                 return redirect(url_for('login_home'))
 
+            # Calcular stock disponible considerando reservas en carritos
+            stock_disponible = Producto.obtener_stock_disponible(producto_id, talla, color)
+            
+            if cantidad > stock_disponible:
+                flash(f"No hay suficiente stock. Disponible: {stock_disponible}", "danger")
+                return redirect(url_for('comprar_producto', id=producto_id))
+
             # Acción: Comprar o Agregar al carrito
             accion = request.form.get('accion')
             if accion == 'comprar':
+                # Verificar stock nuevamente por si cambió
+                stock_actual = Producto.obtener_stock_disponible(producto_id, talla, color)
+                if cantidad > stock_actual:
+                    flash(f"El stock cambió. Disponible ahora: {stock_actual}", "danger")
+                    return redirect(url_for('comprar_producto', id=producto_id))
+
                 # Actualizar stock
                 exito, mensaje = Producto.actualizar_stock(producto_id, talla, color, cantidad)
                 if not exito:
@@ -80,9 +89,15 @@ def registrar_rutas_usuario(app):
                 return redirect(url_for('comprar_producto', id=producto_id))
             
             else:
-                # Agregar el producto al carrito
-                Carrito.agregar_producto(usuario_id, producto_id, talla, color, cantidad)
-                flash("Producto agregado al carrito", "success")
+                # Agregar el producto al carrito con validación de stock
+                exito_agregar, mensaje_agregar = Carrito.agregar_producto(
+                    usuario_id, producto_id, talla, color, cantidad
+                )
+                
+                if not exito_agregar:
+                    flash(mensaje_agregar, "danger")
+                else:
+                    flash("Producto agregado al carrito", "success")
                 return redirect(url_for('comprar_producto', id=producto_id))
 
         except ValueError:
@@ -143,15 +158,15 @@ def registrar_rutas_usuario(app):
                 flash("Debes iniciar sesión para pagar", "warning")
                 return redirect(url_for('login_home'))
             
-            # Procesar pago y actualizar stock
             exito, mensaje = Carrito.procesar_pago(usuario_id)
             
             if exito:
-                flash("¡Pago realizado con éxito! Stock actualizado", "success")
-                return redirect(url_for('ver_carrito'))
+                flash(mensaje, "success")
             else:
-                flash(f"Error al procesar pago: {mensaje}", "danger")
-                return redirect(url_for('ver_carrito'))
+                # El mensaje ya contiene toda la información necesaria
+                flash(mensaje, "warning" if "parcial" in mensaje.lower() else "danger")
+            
+            return redirect(url_for('ver_carrito'))
                 
         except Exception as e:
             flash(f"Error inesperado: {str(e)}", "danger")
