@@ -141,7 +141,7 @@
       <input type="text" placeholder="Buscar producto...">
       <div class="botones">
         <button>Buscar</button>
-        <button onclick="window.location.href='/compras'">Compras</button>
+        <button onclick="window.location.href='/ver_compras'">Compras</button>
 
         {% if session.rol == 1 %}
           <button onclick="window.location.href='/menu_admin'">Productos</button>
@@ -153,7 +153,7 @@
           <button onclick="window.location.href='/login'">Iniciar sesión</button>
         {% endif %}
 
-        <button onclick="window.location.href='/carrito'">Carrito</button>
+        <button onclick="window.location.href='/ver_carrito'">Carrito</button>
       </div>
     </div>
   </header>
