@@ -1,12 +1,13 @@
 from flask import Flask, request, redirect, url_for, render_template
 from .extension import pgdb
 from .views_admin import registrar_rutas
-
+from .views_usuario import registrar_rutas_usuario
 
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'pipzas'
     registrar_rutas(app)
+    registrar_rutas_usuario(app)
 
     return app
 
