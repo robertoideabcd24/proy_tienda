@@ -204,3 +204,4 @@ def registrar_rutas_usuario(app):
         compras = Compra.obtener_compras_usuario(usuario_id)  # <- Este método debes tenerlo definido
         return render_template('usuario/ver_compras.html', compras=compras)
 
+print("hola")
