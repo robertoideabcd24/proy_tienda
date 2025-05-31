@@ -333,4 +333,35 @@ class Producto:
         except Exception as e:
             return False, f"Error al actualizar stock: {e}"
 
+    @staticmethod
+    def obtener_stock_disponible(producto_id, talla, color):
+        """Obtiene stock disponible considerando reservas en carritos"""
+        with pgdb.get_cursor() as cursor:
+            # Obtener stock físico
+            cursor.execute("""
+                SELECT stock FROM producto_detalles
+                WHERE producto_id = %s AND talla = %s AND color = %s
+            """, (producto_id, talla, color))
+            resultado = cursor.fetchone()
+            stock_fisico = resultado[0] if resultado else 0
+            
+            # Obtener cantidad reservada en carritos
+            cursor.execute("""
+                SELECT COALESCE(SUM(cantidad), 0) 
+                FROM carrito 
+                WHERE producto_id = %s AND talla = %s AND color = %s
+            """, (producto_id, talla, color))
+            reservado = cursor.fetchone()[0]
+            
+            return max(0, stock_fisico - reservado)
         
+    @staticmethod
+    def obtener_stock_fisico(producto_id, talla, color):
+        """Obtiene el stock físico sin considerar reservas en carritos"""
+        with pgdb.get_cursor() as cursor:
+            cursor.execute("""
+                SELECT stock FROM producto_detalles
+                WHERE producto_id = %s AND talla = %s AND color = %s
+            """, (producto_id, talla, color))
+            resultado = cursor.fetchone()
+            return resultado[0] if resultado else 0
