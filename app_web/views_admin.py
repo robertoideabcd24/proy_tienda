@@ -50,7 +50,7 @@ def registrar_rutas(app):
                     if usuario['rol'] == 1:
                         return redirect(url_for('menu_admin'))
                     elif usuario['rol'] == 2:
-                        return redirect(url_for('menu_usuario'))
+                        return redirect(url_for('consulta_productos'))
                     else:
                         flash("Rol no válido", 'danger')
                         return redirect(url_for('login_home'))
@@ -77,19 +77,19 @@ def registrar_rutas(app):
             flash(f"Error al acceder al menú de administrador: {str(e)}", 'danger')
             return redirect(url_for('login_home'))
 
-    @app.route('/menu_usuario')
-    @rol_requerido(2)
-    def menu_usuario():
-        try:
-            if session.get('rol') == 2:
-                resultados = Producto.consulta_prod() 
-                return render_template("usuario/consultar_prod_usu.html", datos=resultados)
-        except ProductoNoEncontradoException as pne:
-            flash(str(pne), "danger")
-            return render_template("usuario/consultar_prod_usu.html", datos=[])
-        except Exception as e:
-            flash(f"Error al acceder al menú de usuario: {str(e)}", 'danger')
-            return redirect(url_for('login_home'))
+    # @app.route('/menu_usuario')
+    # #@rol_requerido(2)
+    # def menu_usuario():
+    #     try:
+    #         if session.get('rol') == 2:
+    #             resultados = Producto.consulta_prod() 
+    #             return render_template("usuario/consultar_prod_usu.html", datos=resultados)
+    #     except ProductoNoEncontradoException as pne:
+    #         flash(str(pne), "danger")
+    #         return render_template("usuario/consultar_prod_usu.html", datos=[])
+    #     except Exception as e:
+    #         flash(f"Error al acceder al menú de usuario: {str(e)}", 'danger')
+    #         return redirect(url_for('login_home'))
 
     #----------------------------------------
     # Página para insertar usuario
@@ -285,7 +285,7 @@ def registrar_rutas(app):
     # Detalle de la consulta de productos
     #----------------------------------------
     @app.route('/comprar/<int:id>')
-    @rol_requerido(2)
+    #@rol_requerido(2)
     def comprar_producto(id):
         try:
             producto = Producto.obtener_producto_por_id(id)
@@ -394,6 +394,3 @@ def registrar_rutas(app):
      #----------------------------------------
     # Página de la consulta de productos
     #----------------------------------------
-    
-    
-print("hola")

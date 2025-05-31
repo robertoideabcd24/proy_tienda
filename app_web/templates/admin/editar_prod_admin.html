@@ -73,7 +73,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                         <div>
                             <label>Talla</label>
-                            <input type="text" form="form-editar-{{ detalle.id }}" name="talla" value="{{ detalle.talla }}" required style="width: 100%;">
+                            <input type="number" form="form-editar-{{ detalle.id }}" name="talla" min="1" value="{{ detalle.talla }}" required style="width: 100%;">
                         </div>
                         <div>
                             <label>Color</label>
@@ -81,7 +81,7 @@
                         </div>
                         <div>
                             <label>Stock</label>
-                            <input type="number" form="form-editar-{{ detalle.id }}" name="stock" value="{{ detalle.stock }}" required style="width: 100%;">
+                            <input type="number" form="form-editar-{{ detalle.id }}" name="stock" min="1" value="{{ detalle.stock }}" required style="width: 100%;">
                         </div>
                     </div>
                     
