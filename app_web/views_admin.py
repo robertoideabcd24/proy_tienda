@@ -272,10 +272,10 @@ def registrar_rutas(app):
                                     detalles=detalles)
             else:
                 flash("Producto no encontrado", "warning")
-                return redirect(url_for('menu_usuario'))
+                return redirect(url_for('consulta_productos'))
         except Exception as e:
             flash(f"Error al obtener el producto: {str(e)}", "danger")
-            return redirect(url_for('menu_usuario'))
+            return redirect(url_for('consulta_productos'))
 
     #----------------------------------------
     # Página para insertar producto
