@@ -118,6 +118,12 @@ def registrar_rutas(app):
     def consulta_productos():
             try:
                 resultados = Producto.consulta_prod()
+
+                # Adjuntar ruta de imagen si existe
+                for producto in resultados:
+                    producto['imagen'] = obtener_imagen_producto(producto['id'])
+                    print(f"[DEBUG] Producto {producto['id']} - Imagen: {producto['imagen']}")
+
                 return render_template("consultar_bien.html", datos=resultados)
             except ProductoNoEncontradoException as pne:
                 flash(str(pne), "danger")
