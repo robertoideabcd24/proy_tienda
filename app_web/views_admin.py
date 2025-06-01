@@ -147,10 +147,7 @@ def registrar_rutas(app):
     @rol_requerido(1)
     def editar_producto(id):
         usuario_id = session.get('usuario_id')
-        if not usuario_id:
-            flash("Debes iniciar sesión para ver tus productos.", "warning")
-            return redirect(url_for('login_home'))
-
+        
         # Manejar actualización de detalles
         if request.method == 'POST' and 'talla' in request.form:
             try:
