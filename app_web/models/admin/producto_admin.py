@@ -365,3 +365,27 @@ class Producto:
             """, (producto_id, talla, color))
             resultado = cursor.fetchone()
             return resultado[0] if resultado else 0
+
+
+    @staticmethod
+    def obtener_producto_por_nombre(nombre):  # Elimina el 'cls' de los parámetros
+        try:
+            with pgdb.get_cursor() as cursor:
+                cursor.execute("""
+                    SELECT id, nombre, disponible, precio, marca, descripcion 
+                    FROM productos WHERE nombre = %s
+                """, (nombre,))
+                fila = cursor.fetchone()
+                if fila:
+                    return {
+                        'id': fila[0],
+                        'nombre': fila[1],
+                        'disponible': fila[2],
+                        'precio': fila[3],
+                        'marca': fila[4],
+                        'descripcion': fila[5],
+                    }
+                return None
+        except Exception as e:
+            print(f"Error al obtener producto por nombre: {str(e)}")
+            return None
