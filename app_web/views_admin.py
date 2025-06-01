@@ -66,31 +66,7 @@ def registrar_rutas(app):
 
         return render_template('login.html')
 
-    #----------------------------------------
-    #roles 
-    # @app.route('/menu_admin')
-    # @rol_requerido(1)
-    # def menu_admin():
-    #     try:
-    #         return render_template('admin/menu_admin.html')
-    #     except Exception as e:
-    #         flash(f"Error al acceder al menú de administrador: {str(e)}", 'danger')
-    #         return redirect(url_for('login_home'))
-
-    # @app.route('/menu_usuario')
-    # #@rol_requerido(2)
-    # def menu_usuario():
-    #     try:
-    #         if session.get('rol') == 2:
-    #             resultados = Producto.consulta_prod() 
-    #             return render_template("usuario/consultar_prod_usu.html", datos=resultados)
-    #     except ProductoNoEncontradoException as pne:
-    #         flash(str(pne), "danger")
-    #         return render_template("usuario/consultar_prod_usu.html", datos=[])
-    #     except Exception as e:
-    #         flash(f"Error al acceder al menú de usuario: {str(e)}", 'danger')
-    #         return redirect(url_for('login_home'))
-
+ 
     #----------------------------------------
     # Página para insertar usuario
     #----------------------------------------
@@ -171,10 +147,7 @@ def registrar_rutas(app):
     @rol_requerido(1)
     def editar_producto(id):
         usuario_id = session.get('usuario_id')
-        if not usuario_id:
-            flash("Debes iniciar sesión para ver tus productos.", "warning")
-            return redirect(url_for('login_home'))
-
+        
         # Manejar actualización de detalles
         if request.method == 'POST' and 'talla' in request.form:
             try:
@@ -296,10 +269,10 @@ def registrar_rutas(app):
                                     detalles=detalles)
             else:
                 flash("Producto no encontrado", "warning")
-                return redirect(url_for('menu_usuario'))
+                return redirect(url_for('consulta_productos'))
         except Exception as e:
             flash(f"Error al obtener el producto: {str(e)}", "danger")
-            return redirect(url_for('menu_usuario'))
+            return redirect(url_for('consulta_productos'))
 
     #----------------------------------------
     # Página para insertar producto
