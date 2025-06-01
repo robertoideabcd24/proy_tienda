@@ -3,6 +3,11 @@ from functools import wraps
 from .models.admin.usuario_admin import Usuario, UsuarioException
 from .models.admin.producto_admin import Producto, AltaProductoException, AltaProductoPrecioException, AltaProductoDescripcionException, ProductoNoEncontradoException,ProductoDetalleException
 from .extension import pgdb
+import os
+from werkzeug.utils import secure_filename
+from uuid import uuid4
+import time
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
 
 def rol_requerido(rol_permitido):
     def decorador(func):
@@ -14,6 +19,95 @@ def rol_requerido(rol_permitido):
             return func(*args, **kwargs)
         return wrapper
     return decorador
+
+
+def crear_directorio_imagenes():
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+        print(f"Directorio {UPLOAD_FOLDER} creado exitosamente")
+
+# iamgenes de productos
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'app_web', 'static', 'product_images')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def guardar_imagen_producto(producto_id, file):
+    try:
+        print(f"[DEBUG] Iniciando guardado de imagen para producto {producto_id}")
+        print(f"[DEBUG] UPLOAD_FOLDER: {UPLOAD_FOLDER}")
+        
+        # Crear directorio si no existe
+        if not os.path.exists(UPLOAD_FOLDER):
+            os.makedirs(UPLOAD_FOLDER)
+            print(f"[DEBUG] Directorio creado: {UPLOAD_FOLDER}")
+        
+        if file and file.filename:
+            # Generar nombre único
+            timestamp = str(int(time.time()))
+            extension = file.filename.split('.')[-1].lower()
+            filename = secure_filename(f"prod_{producto_id}_{timestamp}.{extension}")
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            
+            print(f"[DEBUG] Intentando guardar en: {filepath}")
+            
+            # Guardar el archivo
+            file.save(filepath)
+            print(f"[DEBUG] Archivo guardado en: {filepath}")
+            
+            # Verificar que el archivo existe
+            if os.path.exists(filepath):
+                print(f"[DEBUG] Archivo verificado existe: {filepath}")
+                return filename  # Devuelve solo el nombre del archivo
+            else:
+                print("[DEBUG] Error: El archivo no se guardó correctamente")
+                return None
+        else:
+            print("[DEBUG] No se recibió archivo o nombre vacío")
+            return None
+    except Exception as e:
+        print(f"[ERROR] Al guardar imagen: {str(e)}")
+        return None
+    
+def obtener_ruta_imagen(producto_id):
+    upload_folder = os.path.join('app_web', 'static', 'product_images')
+    if not os.path.exists(upload_folder):
+        return None
+    
+    # Buscar cualquier imagen que comience con "prod_[ID]_"
+    for filename in os.listdir(upload_folder):
+        if filename.startswith(f"prod_{producto_id}_"):
+            return filename
+    return None
+
+def obtener_imagen_producto(producto_id):
+    try:
+        if not os.path.exists(UPLOAD_FOLDER):
+            return None
+            
+        for filename in os.listdir(UPLOAD_FOLDER):
+            if filename.startswith(f"prod_{producto_id}_"):
+                print(f"[DEBUG] Imagen encontrada: {filename}")
+                return filename
+        print(f"[DEBUG] No se encontró imagen para producto {producto_id}")
+        return None
+    except Exception as e:
+        print(f"[ERROR] Al buscar imagen: {str(e)}")
+        return None
+
+def eliminar_imagen_producto(producto_id):
+    """Elimina la imagen asociada a un producto"""
+    imagen = obtener_imagen_producto(producto_id)
+    if imagen:
+        try:
+            os.remove(os.path.join(UPLOAD_FOLDER, imagen))
+            return True
+        except:
+            return False
+    return False
+
 
 def registrar_rutas(app):
     #----------------------------------------
@@ -131,6 +225,12 @@ def registrar_rutas(app):
        
         try:
             resultados = Producto.consulta_prod_por_usuario(usuario_id)
+
+            # Adjuntar ruta de imagen si existe
+            for producto in resultados:
+                producto['imagen'] = obtener_imagen_producto(producto['id'])
+                print(f"[DEBUG] Producto {producto['id']} - Imagen: {producto['imagen']}")
+
             return render_template("admin/consultar_prod_admin.html", datos=resultados)
         except ProductoNoEncontradoException as e:
             flash(str(e), "info")
@@ -155,10 +255,22 @@ def registrar_rutas(app):
                 talla = request.form['talla']
                 color = request.form['color']
                 stock = request.form['stock']
+                imagen = request.files.get('imagen')
 
                 if detalle_id:  # Actualización
                     Producto.actualizar_detalle_producto(detalle_id, talla, color, stock)
                     flash("Detalle actualizado correctamente", "info")
+                    # Manejar la imagen
+                    if imagen and imagen.filename:
+                        if allowed_file(imagen.filename):
+                            nombre_archivo = guardar_imagen_producto(producto['id'], imagen)
+                            if nombre_archivo:
+                                # Actualizar el producto con el nombre de la imagen si es necesario
+                                flash("Producto e imagen guardados exitosamente", "success")
+                            else:
+                                flash("Producto guardado pero la imagen no se pudo guardar", "warning")
+                        else:
+                            flash("Formato de imagen no válido", "warning")
                 else:  # Nuevo detalle
                     Producto.insertar_detalle_producto(id, talla, color, stock)
                     flash("Detalle agregado correctamente", "info")
@@ -193,6 +305,16 @@ def registrar_rutas(app):
                 disponible = 'disponible' in request.form 
                 marca = request.form['marca']
                 descripcion = request.form['descripcion']
+                imagen = request.files.get('imagen')
+                eliminar_imagen = 'eliminar_imagen' in request.form
+
+                # Manejo de la imagen
+                if eliminar_imagen:
+                    eliminar_imagen_producto(id)
+                elif imagen:
+                    # Eliminar imagen anterior si existe
+                    eliminar_imagen_producto(id)
+                    guardar_imagen_producto(id, imagen)
 
                 Producto.actualizar_producto(
                     id=id,
@@ -222,6 +344,9 @@ def registrar_rutas(app):
                 return redirect(url_for('consulta_stock'))
             
             detalles = Producto.obtener_detalles_completos_por_id(id)
+            # Obtener imagen si existe
+            imagen = obtener_imagen_producto(id)
+            producto['imagen'] = imagen if imagen else None
             
         except Exception as e:
             print("Error al obtener producto:", e)
@@ -242,6 +367,8 @@ def registrar_rutas(app):
         usuario_id = session.get('usuario_id')
 
         try:
+            # Primero eliminamos la imagen asociada al producto
+            eliminar_imagen_producto(id)
             Producto.eliminar_producto(id=id, usuario_id=usuario_id)
             flash("Producto eliminado correctamente", "success")
         except ProductoNoEncontradoException as e:
@@ -289,8 +416,9 @@ def registrar_rutas(app):
                 disponible = 'disponible' in request.form
                 marca = request.form['marca'].strip()
                 descripcion = request.form['descripcion'].strip()
+                imagen = request.files.get('imagen')
 
-                # Validaciones
+                # Validaciones (las que ya tenías)
                 if not nombre:
                     raise AltaProductoException("El nombre no puede estar vacío")
 
@@ -308,11 +436,30 @@ def registrar_rutas(app):
                 if not descripcion:
                     raise AltaProductoDescripcionException("la descripción no puede estar vacía")
 
-                # Inserción
+                # Inserción del producto
                 exito = Producto.insertar_producto_en_db(nombre, precio, disponible, marca, descripcion, usuario_id)
+                
 
                 if exito:
-                    flash("Producto insertado exitosamente.", "info")
+                    producto = Producto.obtener_producto_por_nombre(nombre)
+                    if not producto:
+                        flash("Producto insertado pero no se pudo recuperar", "warning")
+                        return redirect(url_for('consulta_stock'))
+                    
+                    # Manejar la imagen
+                    if imagen and imagen.filename:
+                        if allowed_file(imagen.filename):
+                            nombre_archivo = guardar_imagen_producto(producto['id'], imagen)
+                            if nombre_archivo:
+                                # Actualizar el producto con el nombre de la imagen si es necesario
+                                flash("Producto e imagen guardados exitosamente", "success")
+                            else:
+                                flash("Producto guardado pero la imagen no se pudo guardar", "warning")
+                        else:
+                            flash("Formato de imagen no válido", "warning")
+                    else:
+                        flash("Producto guardado exitosamente", "success")
+                    
                     return redirect(url_for('consulta_stock'))
                 else:
                     flash("Ocurrió un error al insertar el producto.", "danger")
@@ -342,6 +489,15 @@ def registrar_rutas(app):
                 talla = request.form['talla']
                 color = request.form['color']
                 stock = request.form['stock']
+                imagen = request.files.get('imagen')
+                eliminar_imagen = 'eliminar_imagen' in request.form
+
+                # Manejo de la imagen
+                if eliminar_imagen:
+                    eliminar_imagen_producto(producto_id)
+                elif imagen:
+                    eliminar_imagen_producto(producto_id)
+                    guardar_imagen_producto(producto_id, imagen)
 
                 exito = Producto.insertar_detalle_producto(producto_id, talla, color, stock)
                 if exito:
@@ -354,12 +510,15 @@ def registrar_rutas(app):
             if not producto:
                 flash("Producto no encontrado", "warning")
                 return redirect(url_for('consulta_stock'))
+            
+            # Obtener imagen
+            imagen = obtener_imagen_producto(producto_id)
+            producto['imagen'] = imagen if imagen else None
 
             producto_detalles = Producto.obtener_detalles_por_id(producto_id)
             return render_template('admin/insertar_prod_det_admin.html', 
-                                producto_id=producto_id, 
-                                producto_nombre=producto['nombre'], 
-                                producto_detalles=producto_detalles)
+                       producto=producto, 
+                       producto_detalles=producto_detalles)
         except Exception as e:
             flash(f"Ocurrió un error: {str(e)}", "danger")
             return redirect(url_for('consulta_stock'))
