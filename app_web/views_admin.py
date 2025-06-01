@@ -36,13 +36,13 @@ def allowed_file(filename):
 
 def guardar_imagen_producto(producto_id, file):
     try:
-        print(f"[DEBUG] Iniciando guardado de imagen para producto {producto_id}")
-        print(f"[DEBUG] UPLOAD_FOLDER: {UPLOAD_FOLDER}")
+        #print(f"[DEBUG] Iniciando guardado de imagen para producto {producto_id}")
+        #print(f"[DEBUG] UPLOAD_FOLDER: {UPLOAD_FOLDER}")
         
         # Crear directorio si no existe
         if not os.path.exists(UPLOAD_FOLDER):
             os.makedirs(UPLOAD_FOLDER)
-            print(f"[DEBUG] Directorio creado: {UPLOAD_FOLDER}")
+            #print(f"[DEBUG] Directorio creado: {UPLOAD_FOLDER}")
         
         if file and file.filename:
             # Generar nombre único
@@ -51,24 +51,24 @@ def guardar_imagen_producto(producto_id, file):
             filename = secure_filename(f"prod_{producto_id}_{timestamp}.{extension}")
             filepath = os.path.join(UPLOAD_FOLDER, filename)
             
-            print(f"[DEBUG] Intentando guardar en: {filepath}")
+            #print(f"[DEBUG] Intentando guardar en: {filepath}")
             
             # Guardar el archivo
             file.save(filepath)
-            print(f"[DEBUG] Archivo guardado en: {filepath}")
+            #print(f"[DEBUG] Archivo guardado en: {filepath}")
             
             # Verificar que el archivo existe
             if os.path.exists(filepath):
-                print(f"[DEBUG] Archivo verificado existe: {filepath}")
+                #print(f"[DEBUG] Archivo verificado existe: {filepath}")
                 return filename  # Devuelve solo el nombre del archivo
             else:
-                print("[DEBUG] Error: El archivo no se guardó correctamente")
+                #print("[DEBUG] Error: El archivo no se guardó correctamente")
                 return None
         else:
-            print("[DEBUG] No se recibió archivo o nombre vacío")
+            #print("[DEBUG] No se recibió archivo o nombre vacío")
             return None
     except Exception as e:
-        print(f"[ERROR] Al guardar imagen: {str(e)}")
+        #print(f"[ERROR] Al guardar imagen: {str(e)}")
         return None
     
 def obtener_ruta_imagen(producto_id):
@@ -89,12 +89,12 @@ def obtener_imagen_producto(producto_id):
             
         for filename in os.listdir(UPLOAD_FOLDER):
             if filename.startswith(f"prod_{producto_id}_"):
-                print(f"[DEBUG] Imagen encontrada: {filename}")
+                #print(f"[DEBUG] Imagen encontrada: {filename}")
                 return filename
-        print(f"[DEBUG] No se encontró imagen para producto {producto_id}")
+        #print(f"[DEBUG] No se encontró imagen para producto {producto_id}")
         return None
     except Exception as e:
-        print(f"[ERROR] Al buscar imagen: {str(e)}")
+        #print(f"[ERROR] Al buscar imagen: {str(e)}")
         return None
 
 def eliminar_imagen_producto(producto_id):
@@ -122,7 +122,7 @@ def registrar_rutas(app):
                 # Adjuntar ruta de imagen si existe
                 for producto in resultados:
                     producto['imagen'] = obtener_imagen_producto(producto['id'])
-                    print(f"[DEBUG] Producto {producto['id']} - Imagen: {producto['imagen']}")
+                    #print(f"[DEBUG] Producto {producto['id']} - Imagen: {producto['imagen']}")
 
                 return render_template("consultar_bien.html", datos=resultados)
             except ProductoNoEncontradoException as pne:
@@ -235,7 +235,7 @@ def registrar_rutas(app):
             # Adjuntar ruta de imagen si existe
             for producto in resultados:
                 producto['imagen'] = obtener_imagen_producto(producto['id'])
-                print(f"[DEBUG] Producto {producto['id']} - Imagen: {producto['imagen']}")
+                #print(f"[DEBUG] Producto {producto['id']} - Imagen: {producto['imagen']}")
 
             return render_template("admin/consultar_prod_admin.html", datos=resultados)
         except ProductoNoEncontradoException as e:

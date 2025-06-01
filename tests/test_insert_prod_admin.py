@@ -20,6 +20,7 @@ def test_insertar_producto_get_con_auth(admin_session):
     response = admin_session.get('/insertar_producto')
     assert response.status_code == 200
     assert b"Insertar Producto" in response.data  # Ajusta según tu template
+
 # probado
 def test_insertar_producto_post_valido(admin_session):
     data = {
@@ -34,9 +35,10 @@ def test_insertar_producto_post_valido(admin_session):
         response = admin_session.post('/insertar_producto', data=data, follow_redirects=True)
         assert response.status_code == 200
         assert b"Lista de Productos" in response.data
-        assert b"Producto insertado exitosamente" in response.data
-        assert "Producto insertado exitosamente".encode("utf-8") in response.data
-
+        # Verifica que el producto aparece en la lista
+        assert b"Producto Test" in response.data
+        assert b"100.50" in response.data
+        
 # probado
 def test_insertar_producto_post_excepcion_no_controlada(admin_session):
     """Prueba cuando ocurre una excepción no controlada"""

@@ -2,7 +2,7 @@ import pytest
 
 from app_web.models.admin.producto_admin import Producto
 from app_web.models.admin.producto_admin import AltaProductoPrecioException
-from app_web.models.admin.producto_admin import Producto
+
 from flask import session, url_for, get_flashed_messages
 
 @pytest.fixture
