@@ -395,6 +395,20 @@ def registrar_rutas(app):
     def comprar_producto(id):
         try:
             producto = Producto.obtener_producto_por_id(id)
+
+            imagen = obtener_imagen_producto(id)
+        
+            # Agregar la URL completa de la imagen al producto
+            if imagen:
+                producto['imagen_url'] = f'product_images/{imagen}'
+                # Verifica que la imagen existe físicamente
+                image_path = os.path.join(app.static_folder, 'product_images', imagen)
+                if not os.path.exists(image_path):
+                    print(f"Advertencia: La imagen no existe en {image_path}")
+                    producto['imagen_url'] = None
+            else:
+                producto['imagen_url'] = None
+
             if producto:
                 detalles = Producto.obtener_detalles_por_id(id)
                 return render_template('usuario/comprar_prod_usu.html', 

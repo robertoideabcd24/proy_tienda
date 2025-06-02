@@ -3,69 +3,100 @@
 {% block title %}Consulta de Productos{% endblock %}
 
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta</title>
-    <style>
-        /* Contenedor principal que utiliza CSS Grid */
-        .productos {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 productos por fila */
-            gap: 20px; /* Espacio entre los bloques */
-            padding: 20px;
-        }
-
-        /* Cada bloque de producto */
-        .producto {
-            border: 1px solid #ccc; /* Borde gris claro */
-            padding: 10px;
-            background-color: #f9f9f9;
-            text-align: center;
-            border-radius: 5px;
-        }
-
-        /* Estilo para los títulos dentro del bloque */
-        .producto h2 {
-            font-size: 18px;
-            color: #333;
-        }
-
-        .producto p {
-            font-size: 16px;
-            color: #666;
-        }
-
-        /* Responsividad: cuando la pantalla es más pequeña (móvil) */
-        @media (max-width: 768px) {
-            .productos {
-                grid-template-columns: repeat(2, 1fr); /* 2 productos por fila */
-            }
-        }
-
-        @media (max-width: 480px) {
-            .productos {
-                grid-template-columns: 1fr; /* 1 producto por fila */
-            }
-        }
-    </style>
-</head>
-<body>
-    <h1>Lista de Productos</h1>
+<div class="container py-4">
+ 
     
     <div class="productos">
         {% for producto in datos %}
             <a href="{{ url_for('comprar_producto', id=producto.id) }}" style="text-decoration: none; color: inherit;">
-                <div class="producto">
-                    <h2>{{ producto.nombre }}</h2>  
-                    <p>Marca: {{ producto.marca }}</p>
-                    <p>Descripción: {{ producto.descripcion }}</p>
-                    <p>Disponible: {{ producto.disponible }}</p>
-                    <p>Precio: ${{ producto.precio }}</p>
+                <div class="producto card h-100">
+                    <!-- Imagen del producto -->
+                    <div class="card-img-top text-center p-3">
+                    <!-- Debug: mostrar la ruta completa -->
+                    <p>Debug: {{ producto.imagen_url }}</p>
+                    
+                    {% if producto.imagen_url %}
+                        <img src="{{ url_for('static', filename=producto.imagen_url) }}" 
+                            alt="Imagen de {{ producto.nombre }}" 
+                            class="img-thumbnail" 
+                            style="max-height: 180px; width: auto; object-fit: contain;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='imagenes/no-disponible.png') }}" 
+                            alt="Sin imagen" 
+                            class="img-thumbnail" 
+                            style="max-height: 180px; width: auto; object-fit: contain;">
+                    {% endif %}
+                </div>
+
+
+
+                    
+                    <div class="card-body">
+                        <h2 class="card-title">{{ producto.nombre }}</h2>  
+                        <p class="card-text"><strong>Marca:</strong> {{ producto.marca }}</p>
+                        <p class="card-text"><small class="text-muted">{{ producto.descripcion|truncate(100) }}</small></p>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-{{ 'success' if producto.disponible else 'danger' }}">
+                                {{ 'Disponible' if producto.disponible else 'Agotado' }}
+                            </span>
+                            <span class="h5 text-primary">${{ producto.precio }}</span>
+                        </div>
+                    </div>
                 </div>
             </a>
         {% endfor %}
     </div>    
+</div>
 
-</body>
+<style>
+    /* Contenedor principal que utiliza CSS Grid */
+    .productos {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+    /* Cada bloque de producto */
+    .producto {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+    }
+
+    .producto:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .producto h2 {
+        font-size: 1.1rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Responsividad */
+    @media (max-width: 768px) {
+        .productos {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .productos {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .img-thumbnail {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 4px;
+    }
+</style>
 {% endblock %}
