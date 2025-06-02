@@ -3,47 +3,51 @@
 {% block title %}Consulta de Productos{% endblock %}
 
 {% block content %}
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta</title>
-    <!-- Asegúrate de tener Bootstrap cargado en tu base.html -->
-</head>
-
-<body class="bg-light">
-    <div class="container py-4">
-        <h1 class="mb-4 text-center">Lista de Productos</h1>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-            {% for producto in datos %}
-                <div class="col">
-                    <a href="{{ url_for('comprar_producto', id=producto.id) }}" class="text-decoration-none text-dark">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">{{ producto.nombre }}</h5>
-                                <p class="card-text mb-1"><strong>Marca:</strong> {{ producto.marca }}</p>
-                                <p class="card-text mb-1"><strong>Descripción:</strong> {{ producto.descripcion }}</p>
-                                <p class="card-text mb-1"><strong>Disponible:</strong> {{ producto.disponible }}</p>
-                                <p class="card-text"><strong>Precio:</strong> ${{ producto.precio }}</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+<div class="container py-5">
+    
+    <!-- Mensajes Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             {% endfor %}
-        </div>
-    </div>
-</body>
+        {% endif %}
+    {% endwith %}
 
+    <!-- Grid de productos -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for producto in datos %}
+        <div class="col">
+            <a href="{{ url_for('comprar_producto', id=producto.id) }}" class="text-decoration-none text-dark">
+                <div class="card h-100 shadow-sm border border-0 rounded-4 hover-shadow">
+
+                    {% if producto.imagen %}
+                    <img src="{{ url_for('static', filename='product_images/' + producto.imagen) }}"
+                         class="card-img-top p-3"
+                         alt="{{ producto.nombre }}"
+                         style="object-fit: contain; height: 200px;">
+                    {% else %}
+                    <div class="d-flex flex-column justify-content-center align-items-center bg-light py-4" style="height: 200px;">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                        <p class="mt-2 text-muted small">Sin imagen</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-truncate">{{ producto.nombre }}</h5>
+                        <p class="card-text mb-1 text-muted"><strong>Marca:</strong> {{ producto.marca }}</p>
+                        <p class="card-text mb-1 text-muted small text-truncate" title="{{ producto.descripcion }}">
+                            <strong>Descripción:</strong> {{ producto.descripcion }}
+                        </p>
+                        <p class="card-text fw-bold text-success"><strong>Precio:</strong> ${{ producto.precio }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

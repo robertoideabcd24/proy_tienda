@@ -47,9 +47,6 @@ def registrar_rutas_usuario(app):
 
             # Obtener usuario_id desde la sesión
             usuario_id = session.get('usuario_id')
-            if not usuario_id:
-                flash("Usuario no autenticado", "danger")
-                return redirect(url_for('login_home'))
 
             # Calcular stock disponible considerando reservas en carritos
             stock_disponible = Producto.obtener_stock_disponible(producto_id, talla, color)
@@ -63,15 +60,15 @@ def registrar_rutas_usuario(app):
             if accion == 'comprar':
                 # Verificar stock nuevamente por si cambió
                 stock_actual = Producto.obtener_stock_disponible(producto_id, talla, color)
-                if cantidad > stock_actual:
-                    flash(f"El stock cambió. Disponible ahora: {stock_actual}", "danger")
-                    return redirect(url_for('comprar_producto', id=producto_id))
+                # if cantidad > stock_actual:
+                #     flash(f"El stock cambió. Disponible ahora: {stock_actual}", "danger")
+                #     return redirect(url_for('comprar_producto', id=producto_id))
 
                 # Actualizar stock
                 exito, mensaje = Producto.actualizar_stock(producto_id, talla, color, cantidad)
-                if not exito:
-                    flash(mensaje, "danger")
-                    return redirect(url_for('comprar_producto', id=producto_id))
+                # if not exito:
+                #     flash(mensaje, "danger")
+                #     return redirect(url_for('comprar_producto', id=producto_id))
 
                 # Obtener precio del producto
                 producto = Producto.obtener_producto_por_id(producto_id)
@@ -100,8 +97,8 @@ def registrar_rutas_usuario(app):
                     flash("Producto agregado al carrito", "success")
                 return redirect(url_for('comprar_producto', id=producto_id))
 
-        except ValueError:
-            flash("Cantidad inválida", "danger")
+        # except ValueError:
+        #     flash("Cantidad inválida", "danger")
         except Exception as e:
             flash(f"Error: {str(e)}", "danger")
 
@@ -126,10 +123,6 @@ def registrar_rutas_usuario(app):
     @rol_requerido(2)  # Añade el decorador para requerir rol de usuario
     def ver_carrito():
         try:
-            # Verificar que el usuario está autenticado
-            if 'usuario_id' not in session:
-                flash("Debes iniciar sesión para ver tu carrito", "warning")
-                return redirect(url_for('login_home'))
             
             usuario_id = session['usuario_id']
             print(f" usuario_id en sesión: {usuario_id}")
@@ -154,9 +147,6 @@ def registrar_rutas_usuario(app):
     def pagar_carrito():
         try:
             usuario_id = session.get('usuario_id')
-            if not usuario_id:
-                flash("Debes iniciar sesión para pagar", "warning")
-                return redirect(url_for('login_home'))
             
             exito, mensaje = Carrito.procesar_pago(usuario_id)
             
@@ -177,9 +167,6 @@ def registrar_rutas_usuario(app):
     def eliminar_del_carrito():
         try:
             usuario_id = session.get('usuario_id')
-            if not usuario_id:
-                flash("Debes iniciar sesión para modificar el carrito", "warning")
-                return redirect(url_for('login_home'))
 
             producto_id = int(request.form['producto_id'])
             talla = request.form['talla']
@@ -197,11 +184,6 @@ def registrar_rutas_usuario(app):
     @rol_requerido(2)
     def ver_compras():
         usuario_id = session.get('usuario_id')
-        if not usuario_id:
-            flash("Debes iniciar sesión para ver tus compras", "warning")
-            return redirect(url_for('login_home'))
-
+        
         compras = Compra.obtener_compras_usuario(usuario_id)  # <- Este método debes tenerlo definido
         return render_template('usuario/ver_compras.html', compras=compras)
-
-print("hola")

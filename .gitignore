@@ -1,6 +1,16 @@
 __pycache__/
 **/__pycache__/
 reporte/
+app_web/static/
+**/app_web/static/
+
+app_web/static/product_images/*.png
+app_web/static/product_images/*.jpg
+app_web/static/product_images/*.jpeg
+app_web/static/product_images/*.gif
+
+app_web/static/product_images/
+
 
 # Ignorar archivo para pruebas de cobertura
 reporte/
@@ -9,7 +19,6 @@ reporte/
 
 # Ignorar entorno virtual
 .venv/
-<<<<<<< HEAD
 
 .pytest_cache/
 **/.pytest_cache/
@@ -19,7 +28,7 @@ reporte/
 
 .gitignore
 **/.gitignore
-=======
+
 .pytest_cache/
 **/.pytest_cache/
->>>>>>> origin/test/pytest-admin
+

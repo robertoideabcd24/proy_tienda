@@ -194,7 +194,10 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <form method="POST" action="{{ url_for('eliminar_producto', id=producto.id) }}" style="display: inline;">
-                    <button type="submit" class="btn btn-danger">Eliminar Producto</button>
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i> Eliminar Definitivamente
+                    </button>
                 </form>
             </div>
         </div>

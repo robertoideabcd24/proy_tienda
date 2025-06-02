@@ -4,118 +4,116 @@
 
 {% block content %}
 
-<div class="mb-3">
-    <a href="{{ url_for('consulta_productos') }}" class="btn btn-primary">
-      <i class="fas fa-arrow-left me-2"></i>Volver al Catálogo
+<div class="container my-5">
+    <a href="{{ url_for('consulta_productos') }}" class="btn btn-outline-primary mb-4">
+        <i class="fas fa-arrow-left me-2"></i>Volver al Catálogo
     </a>
-  </div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
-<div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
-    <div style="display: flex; border: 1px solid #ccc; padding: 20px; border-radius: 10px; background-color: #f4f4f4;">
-
-        <!-- Info del producto -->
-        <div style="margin-right: 40px; text-align: center;">
-            <h1>{{ producto.nombre }}</h1>
-            <p><strong>Disponible:</strong> {{ 'Sí' if producto.disponible else 'No' }}</p>
-            <p><strong>Marca:</strong> {{ producto.marca }}</p>
-            <p><strong>Descripción:</strong> {{ producto.descripcion }}</p>
-            <p><strong>Precio:</strong> ${{ producto.precio }}</p>
-
-            <form action="{{ url_for('agregar_carrito', producto_id=producto.id) }}" method="post" style="margin-top: 20px;">
-                <h3>Detalles:</h3>
-                {% if detalles %}
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                            <th></th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Talla</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Color</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Stock</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Cantidad</th>
-                        </tr>
-                        {% for detalle in detalles %}
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
-                                <input type="radio" name="detalle_seleccionado" value="{{ loop.index0 }}">
-                            </td>
-                            <td style="border: 1px solid #ddd; padding: 8px;">{{ detalle[0] }}</td>
-                            <td style="border: 1px solid #ddd; padding: 8px;">{{ detalle[1] }}</td>
-                            <td style="border: 1px solid #ddd; padding: 8px;">{{ detalle[2] }}</td>
-                            <td style="border: 1px solid #ddd; padding: 8px;">
-                                <input type="number" name="cantidad_{{ loop.index0 }}" min="0" max="{{ detalle[2] }}"  value="1" style="width: 60px;">
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-
-                    <div style="margin-top: 20px;">
-                        <button type="submit" name="accion" value="agregar" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                            Agregar al carrito
-                        </button>
-                        <button type="submit" name="accion" value="comprar" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                            Comprar
-                        </button>
-                    </div>
+    <div class="card border-0 shadow-lg overflow-hidden">
+        <div class="row g-0">
+            <!-- Imagen del producto -->
+            <div class="col-md-5 bg-light d-flex align-items-center justify-content-center p-4">
+                {% if producto.imagen_url %}
+                    <img src="{{ url_for('static', filename=producto.imagen_url) }}" 
+                         alt="Imagen de {{ producto.nombre }}" 
+                         class="img-fluid rounded-3" style="max-height: 500px; width: auto; object-fit: contain;">
                 {% else %}
-                    <p>No hay detalles disponibles para este producto.</p>
+                    <img src="{{ url_for('static', filename='imagenes/no-disponible.png') }}" 
+                         alt="Sin imagen" 
+                         class="img-fluid rounded-3" style="max-height: 500px; width: auto; object-fit: contain;">
                 {% endif %}
-            </form>
+            </div>
+
+            <!-- Información del producto -->
+            <div class="col-md-7">
+                <div class="card-body p-4 p-lg-5">
+                    <h1 class="card-title mb-3">{{ producto.nombre }}</h1>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-secondary me-2">{{ producto.marca }}</span>
+                        <h3 class="text-primary mb-0">${{ producto.precio }}</h3>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="mb-2">Descripción:</h5>
+                        <p class="card-text text-muted">{{ producto.descripcion }}</p>
+                    </div>
+                    
+                    <hr class="my-4">
+
+                    <form action="{{ url_for('agregar_carrito', producto_id=producto.id) }}" method="post">
+                        <h4 class="mb-3">Disponibilidad</h4>
+                        
+                        {% if detalles %}
+                            <div class="table-responsive mb-4">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 40px;"></th>
+                                            <th>Talla</th>
+                                            
+                                            <th>Stock</th>
+                                            <th>Cantidad</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for detalle in detalles %}
+                                        <tr>
+                                            <td>
+                                                <input type="radio" name="detalle_seleccionado" value="{{ loop.index0 }}" 
+                                                       class="form-check-input" required>
+                                            </td>
+                                            <td><span class="badge bg-dark">{{ detalle[0] }}</span></td>
+                                           
+                                            <td>
+                                                {% if detalle[2] > 5 %}
+                                                    <span class="text-success">{{ detalle[2] }} disponibles</span>
+                                                {% elif detalle[2] > 0 %}
+                                                    <span class="text-warning">Solo {{ detalle[2] }} disponibles</span>
+                                                {% else %}
+                                                    <span class="text-danger">Agotado</span>
+                                                {% endif %}
+                                            </td>
+                                            <td style="width: 150px;">
+                                                <input type="number" name="cantidad_{{ loop.index0 }}" 
+                                                       class="form-control form-control-sm" 
+                                                       min="0" max="{{ detalle[2] }}" value="0" step="1"
+                                                       {% if detalle[2] == 0 %}disabled{% endif %}>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="d-flex gap-3 mt-4">
+                                <button type="submit" name="accion" value="agregar" class="btn btn-primary btn-lg flex-grow-1">
+                                    <i class="fas fa-cart-arrow-down me-2"></i>Agregar al carrito
+                                </button>
+                                <button type="submit" name="accion" value="comprar" class="btn btn-success btn-lg flex-grow-1">
+                                    <i class="fas fa-bolt me-2"></i>Comprar ahora
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-circle me-2"></i>Actualmente no hay disponibilidad para este producto.
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-<style>
-.alert {
-    padding: 15px 20px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
-
-}
-
-@keyframes fadeOut {
-    to {
-        opacity: 0;
-        visibility: hidden;
-    }
-}
-
-/* Colores por tipo */
-.alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-.alert-warning {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-}
-
-.alert-info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
-}
-</style>
 
 {% endblock %}
