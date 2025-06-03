@@ -271,7 +271,7 @@ def registrar_rutas(app):
                         if allowed_file(imagen.filename):
                             nombre_archivo = guardar_imagen_producto(producto['id'], imagen)
                             if nombre_archivo:
-                                # Actualizar el producto con el nombre de la imagen si es necesario
+                                
                                 flash("Producto e imagen guardados exitosamente", "success")
                             else:
                                 flash("Producto guardado pero la imagen no se pudo guardar", "warning")
@@ -438,7 +438,7 @@ def registrar_rutas(app):
                 descripcion = request.form['descripcion'].strip()
                 imagen = request.files.get('imagen')
 
-                # Validaciones (las que ya tenías)
+                # Validaciones 
                 if not nombre:
                     raise AltaProductoException("El nombre no puede estar vacío")
 

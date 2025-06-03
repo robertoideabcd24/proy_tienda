@@ -29,7 +29,7 @@ def test_editar_producto_get_success(client, admin_session):
             
             assert response.status_code == 200
             assert b"Producto prueba" in response.data
-            assert b"Editar Producto" in response.data  # Ajustar según tu template
+            assert b"Editar Producto" in response.data  
     finally:
         try:
             Producto.eliminar_producto(producto_id, 1)
@@ -64,7 +64,7 @@ def test_editar_producto_post_update_success(client, admin_session):
             assert messages[0][0] == 'success'
             assert "Producto actualizado correctamente" in messages[0][1]
             
-            # Verificar que los cambios se aplicaron
+         
             producto = Producto.obtener_producto_por_id(producto_id)
             assert producto['nombre'] == 'Producto actualizado'
             assert float(producto['precio']) == 75.00
@@ -86,7 +86,7 @@ def test_editar_producto_get_not_found(client, admin_session):
         messages = get_flashed_messages(with_categories=True)
         assert len(messages) == 1
         assert messages[0][0] == 'danger'
-        assert "Error al consultar producto" in messages[0][1]  # Mensaje exacto que muestra tu app
+        assert "Error al consultar producto" in messages[0][1]  
         assert b"Lista de Productos" in response.data
 
 def test_editar_producto_post_add_detail_success(client, admin_session):
@@ -144,13 +144,13 @@ def test_editar_producto_post_unauthorized(client):
         assert b"Iniciar sesi\xc3\xb3n" in response.data
         
         messages = get_flashed_messages(with_categories=True)
-        if messages:  # Más flexible según implementación
+        if messages:  
             assert "Acceso no autorizado" in messages[0][1] or \
                    "Debes iniciar sesión" in messages[0][1]
 
 def test_editar_producto_post_update_detail_success(client, admin_session):
     """Prueba actualización de detalle existente"""
-    # Crear producto y detalle
+  
     producto_id = Producto.insertar_producto_en_db(
         nombre="Producto prueba",
         precio=100.00,
@@ -182,9 +182,9 @@ def test_editar_producto_post_update_detail_success(client, admin_session):
             # Verificaciones
             assert response.status_code == 200
             
-            # Verificar mensaje flash (ajustar según comportamiento real)
+            
             messages = get_flashed_messages(with_categories=True)
-            if messages:  # Puede que no haya mensaje si fue exitoso
+            if messages:  
                 if messages[0][0] == 'info':
                     assert "Detalle actualizado correctamente" in messages[0][1]
                 else:
@@ -236,7 +236,7 @@ def test_editar_producto_post_update_detail_failure(client, admin_session):
     detalle_id = detalles[0]['id'] if isinstance(detalles[0], dict) else detalles[0].id
 
     try:
-        # Mock manual de la excepción
+        
         original_method = Producto.actualizar_detalle_producto
         Producto.actualizar_detalle_producto = lambda *args: (_ for _ in ()).throw(
             ProductoDetalleException("Talla no válida"))
@@ -318,7 +318,7 @@ def test_editar_producto_post_delete_detail_failure(client, admin_session):
     )
     
     try:
-        # Mock manual de la excepción
+      
         original_method = Producto.eliminar_detalle_producto
         Producto.eliminar_detalle_producto = lambda *args: (_ for _ in ()).throw(
             ProductoDetalleException("No se puede eliminar el detalle"))
@@ -353,10 +353,10 @@ def test_editar_producto_post_update_product_failure(client, admin_session):
     )
     
     try:
-        # Mock manual de la excepción
+        
         original_method = Producto.actualizar_producto
 
-        # Función mock que lanza la excepción con los mismos parámetros que recibe
+       
         def mock_actualizar_producto(id, nombre, precio, disponible, marca, descripcion, usuario_id):
             raise ProductoNoEncontradoException("Producto no existe")
 
@@ -374,8 +374,8 @@ def test_editar_producto_post_update_product_failure(client, admin_session):
             assert response.status_code == 200
             messages = get_flashed_messages(with_categories=True)
             assert len(messages) == 1
-            assert messages[0][0] == 'warning'  # Changed from 'danger' to 'warning'
-            assert "Producto no existe" in messages[0][1]  # Also updated to match exact exception message
+            assert messages[0][0] == 'warning'  
+            assert "Producto no existe" in messages[0][1]  
     finally:
         # Restaurar método original
         Producto.actualizar_producto = original_method
@@ -403,7 +403,7 @@ def test_editar_producto_post_general_update_detail_exception(client, admin_sess
     detalle_id = detalles[0]['id'] if isinstance(detalles[0], dict) else detalles[0].id
 
     try:
-        # Mock manual de la excepción
+       
         original_method = Producto.actualizar_detalle_producto
         
         def mock_actualizar_detalle(*args, **kwargs):
@@ -452,7 +452,7 @@ def test_editar_producto_post_general_delete_detail_exception(client, admin_sess
     detalle_id = detalles[0]['id'] if isinstance(detalles[0], dict) else detalles[0].id
 
     try:
-        # Mock manual de la excepción
+       
         original_method = Producto.eliminar_detalle_producto
         
         def mock_eliminar_detalle(*args, **kwargs):
@@ -493,7 +493,7 @@ def test_editar_producto_post_general_update_product_exception(client, admin_ses
     )
     
     try:
-        # Mock manual de la excepción
+       
         original_method = Producto.actualizar_producto
         
         def mock_actualizar_producto(*args, **kwargs):
@@ -525,7 +525,7 @@ def test_editar_producto_post_general_update_product_exception(client, admin_ses
 
 def test_editar_producto_get_product_not_found(client, admin_session):
     """Prueba GET con producto no encontrado"""
-    # Mock the obtener_producto_por_id method to return None
+    
     original_method = Producto.obtener_producto_por_id
     
     def mock_obtener_producto(id):
@@ -541,9 +541,9 @@ def test_editar_producto_get_product_not_found(client, admin_session):
             assert response.status_code == 200
             messages = get_flashed_messages(with_categories=True)
             assert len(messages) == 1
-            assert messages[0][0] == 'warning'  # This matches the None check case
+            assert messages[0][0] == 'warning' 
             assert "Producto no encontrado" in messages[0][1]
             assert b"Lista de Productos" in response.data
     finally:
-        # Restore original method
+       
         Producto.obtener_producto_por_id = original_method

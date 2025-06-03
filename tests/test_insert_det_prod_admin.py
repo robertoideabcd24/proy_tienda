@@ -16,7 +16,7 @@ def admin_session(client):
 
 @pytest.fixture
 def producto_de_prueba():
-    """Crea un producto real si no se hace mock"""
+    
     nombre = "Producto Detalle Test"
     precio = 99.99
     disponible = True
@@ -54,14 +54,14 @@ def test_post_insertar_detalles_producto_valido(admin_session, producto_de_prueb
     assert b"Detalle del producto insertado correctamente" in response.data
 
 # -------------------------------
-# POST falla al insertar detalle (si la lógica real lo permite)
+# POST falla al insertar detalle
 # -------------------------------
 def test_post_insertar_detalles_producto_falla(admin_session, producto_de_prueba):
-    # Simula error mandando stock vacío (dependiendo si tienes validación interna)
+   
     data = {
         'talla': 'XL',
         'color': 'Rojo',
-        'stock': ''  # Podría provocar falla si hay validación interna
+        'stock': ''  
     }
 
     response = admin_session.post(f'/insertar_detalles_producto/{producto_de_prueba}', data=data, follow_redirects=True)
@@ -72,7 +72,7 @@ def test_post_insertar_detalles_producto_falla(admin_session, producto_de_prueba
 # Producto no existe
 # -------------------------------
 def test_insertar_detalles_producto_producto_no_existente(admin_session):
-    producto_id = 99999  # ID muy alto para simular no existencia
+    producto_id = 99999  
 
     response = admin_session.get(f'/insertar_detalles_producto/{producto_id}', follow_redirects=False)
     assert response.status_code == 302

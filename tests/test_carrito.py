@@ -1,7 +1,3 @@
-#===========================================================================================================================
-
-# CARRITO 
-#####################################
 import pytest
 from unittest.mock import patch
 from app_web.models.usuario.carrito_usuario import Carrito
@@ -42,7 +38,7 @@ def test_agregar_producto_sin_stock(mock_producto, mock_pgdb):
     assert exito is False
     assert "No hay suficiente stock" in mensaje
 
-# 1. obtener_por_usuario_y_producto - existe y no existe
+
 @patch("app_web.models.usuario.carrito_usuario.pgdb")
 def test_obtener_por_usuario_y_producto_existente(mock_pgdb):
     mock_pgdb.get_cursor.return_value.__enter__.return_value.fetchone.return_value = (
@@ -101,7 +97,7 @@ def test_agregar_producto_existente_incrementa_cantidad(mock_producto, mock_pgdb
     cantidad = 2
 
     mock_producto.obtener_stock_disponible.return_value = 10
-    # Simular item existente con cantidad 3
+
     mock_pgdb.get_cursor.return_value.__enter__.return_value.fetchone.return_value = (
         1, usuario_id, producto_id, talla, color, 3, "2025-06-01"
     )
@@ -159,7 +155,7 @@ def test_obtener_detalles_con_reserva_error(mock_pgdb):
     assert resultado == []
 
 
-# 7. procesar_pago - éxito, parcial, error
+
 @patch("app_web.models.usuario.carrito_usuario.pgdb")
 @patch("app_web.models.usuario.carrito_usuario.Producto")
 @patch("app_web.models.usuario.carrito_usuario.Compra")
@@ -198,7 +194,7 @@ def test_procesar_pago_error_db(mock_pgdb):
     assert "Error al procesar pago" in mensaje
 
 
-# 8. eliminar_producto - éxito y error
+
 @patch("app_web.models.usuario.carrito_usuario.pgdb")
 def test_eliminar_producto_exito(mock_pgdb):
     cursor = mock_pgdb.get_cursor.return_value.__enter__.return_value
@@ -213,7 +209,7 @@ def test_eliminar_producto_error(mock_pgdb):
         Carrito.eliminar_producto(1, 10, "M", "Rojo")
 
 
-# 9. calcular_descuento
+
 def test_calcular_descuento():
     assert Carrito.calcular_descuento(12) == 0.3
     assert Carrito.calcular_descuento(6) == 0.2

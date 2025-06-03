@@ -20,7 +20,7 @@ def producto_con_stock_y_reservas(setup_db):
     stock_fisico = 10
     Producto.insertar_detalle_producto(producto_id, talla, color, stock_fisico)
     
-    # Crear algunas reservas en carrito (simuladas)
+    
     with pgdb.get_cursor() as cursor:
         # Insertar reservas de prueba
         cursor.execute("""
@@ -43,52 +43,6 @@ def producto_con_stock_y_reservas(setup_db):
         cursor.execute("DELETE FROM carrito WHERE producto_id = %s", (producto_id,))
     Producto.eliminar_producto(producto_id, 1)
 
-# def test_obtener_stock_disponible_con_reservas(producto_con_stock_y_reservas):
-#     """Prueba cálculo de stock disponible considerando reservas"""
-#     # Datos del fixture
-#     data = producto_con_stock_y_reservas
-#     stock_esperado = data["stock_fisico"] - data["reservas_esperadas"]
-    
-#     # Ejecutar la función
-#     stock_disponible = Producto.obtener_stock_disponible(
-#         producto_id=data["producto_id"],
-#         talla=data["talla"],
-#         color=data["color"]
-#     )
-    
-#     # Verificar resultado
-#     assert stock_disponible == stock_esperado
-
-# def test_obtener_stock_disponible_sin_reservas(setup_db):
-#     """Prueba cuando no hay reservas en carritos"""
-#     # Crear producto y detalle
-#     producto_id = Producto.insertar_producto_en_db(
-#         nombre="Tenis sin reservas",
-#         precio=200.00,
-#         disponible=True,
-#         marca="Marca Test",
-#         descripcion="Descripción test",
-#         usuario_id=1
-#     )
-#     talla = "8"
-#     color = "Blanco"
-#     stock_fisico = 7
-#     Producto.insertar_detalle_producto(producto_id, talla, color, stock_fisico)
-    
-#     try:
-#         # Ejecutar la función
-#         stock_disponible = Producto.obtener_stock_disponible(
-#             producto_id=producto_id,
-#             talla=talla,
-#             color=color
-#         )
-        
-#         # Verificar resultado (debería ser igual al stock físico)
-#         assert stock_disponible == stock_fisico
-    
-#     finally:
-#         # Limpieza
-#         Producto.eliminar_producto(producto_id, 1)
 
 def test_obtener_stock_disponible_detalle_no_existe():
     """Prueba cuando el detalle de producto no existe"""
@@ -100,87 +54,3 @@ def test_obtener_stock_disponible_detalle_no_existe():
     
     # Debería devolver 0 cuando no existe el detalle
     assert stock_disponible == 0
-
-# def test_obtener_stock_disponible_mas_reservas_que_stock(producto_con_stock_y_reservas):
-#     """Prueba cuando las reservas superan el stock físico (no debería ser negativo)"""
-#     # Datos del fixture
-#     data = producto_con_stock_y_reservas
-    
-#     # Agregar más reservas para superar el stock físico
-#     with pgdb.get_cursor() as cursor:
-#         cursor.execute("""
-#             INSERT INTO carrito (usuario_id, producto_id, talla, color, cantidad, fecha_agregado)
-#             VALUES (3, %s, %s, %s, %s, NOW())
-#         """, (data["producto_id"], data["talla"], data["color"], data["stock_fisico"]))
-    
-#     # Ejecutar la función
-#     stock_disponible = Producto.obtener_stock_disponible(
-#         producto_id=data["producto_id"],
-#         talla=data["talla"],
-#         color=data["color"]
-#     )
-    
-#     # Verificar que no sea negativo (debería ser 0)
-#     assert stock_disponible == 0
-
-# def test_obtener_stock_disponible_con_talla_numerica(setup_db):
-#     """Prueba que funciona correctamente con tallas numéricas"""
-#     # Crear producto con talla numérica
-#     producto_id = Producto.insertar_producto_en_db(
-#         nombre="Tenis talla numérica",
-#         precio=180.00,
-#         disponible=True,
-#         marca="Marca Test",
-#         descripcion="Descripción test",
-#         usuario_id=1
-#     )
-#     talla = 9  # Talla como número
-#     color = "Rojo"
-#     stock_fisico = 4
-#     Producto.insertar_detalle_producto(producto_id, talla, color, stock_fisico)
-    
-#     try:
-#         # Ejecutar la función
-#         stock_disponible = Producto.obtener_stock_disponible(
-#             producto_id=producto_id,
-#             talla=talla,
-#             color=color
-#         )
-        
-#         # Verificar resultado
-#         assert stock_disponible == stock_fisico
-    
-#     finally:
-#         # Limpieza
-#         Producto.eliminar_producto(producto_id, 1)
-
-# def test_obtener_stock_disponible_con_talla_decimal(setup_db):
-#     """Prueba que funciona correctamente con tallas decimales como string"""
-#     # Crear producto con talla decimal
-#     producto_id = Producto.insertar_producto_en_db(
-#         nombre="Tenis talla decimal",
-#         precio=220.00,
-#         disponible=True,
-#         marca="Marca Test",
-#         descripcion="Descripción test",
-#         usuario_id=1
-#     )
-#     talla = "8.5"  # Talla decimal como string
-#     color = "Verde"
-#     stock_fisico = 6
-#     Producto.insertar_detalle_producto(producto_id, talla, color, stock_fisico)
-    
-#     try:
-#         # Ejecutar la función
-#         stock_disponible = Producto.obtener_stock_disponible(
-#             producto_id=producto_id,
-#             talla=talla,
-#             color=color
-#         )
-        
-#         # Verificar resultado
-#         assert stock_disponible == stock_fisico
-    
-#     finally:
-#         # Limpieza
-#         Producto.eliminar_producto(producto_id, 1)

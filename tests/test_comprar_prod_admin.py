@@ -61,9 +61,9 @@ def test_comprar_producto_sin_detalles(client, user_session):
             
             assert response.status_code == 200
             assert b"Producto sin detalles" in response.data
-            # Verificar que se maneja adecuadamente la ausencia de detalles
+           
             assert b"No hay detalles disponibles" in response.data or \
-                   b"Sin detalles" in response.data  # Ajustar según tu template
+                   b"Sin detalles" in response.data  
     finally:
         try:
             Producto.eliminar_producto(producto_id, 1)
@@ -84,7 +84,7 @@ def test_comprar_producto_error_general(client, user_session):
     )
     
     try:
-        # Mock manual sin monkeypatch
+      
         original_method = Producto.obtener_producto_por_id
         Producto.obtener_producto_por_id = lambda *args: (_ for _ in ()).throw(Exception("Error de prueba"))
         
@@ -109,14 +109,12 @@ def test_comprar_producto_error_general(client, user_session):
 
 def test_comprar_producto_sin_permisos(client):
     """Prueba acceso no autorizado"""
-    # No necesita producto real
+ 
     with client:
         response = client.get('/comprar/1', follow_redirects=True)
         
-        # Verificar redirección a login si el decorador está activo
-        # Si el decorador @rol_requerido(2) está comentado, esta prueba puede fallar
         assert response.status_code == 200
         assert b"Iniciar sesi\xc3\xb3n" in response.data or \
-               b"Lista de Productos" in response.data  # Depende de tu implementación
+               b"Lista de Productos" in response.data  
 
 #no funciona

@@ -1,7 +1,8 @@
-from unittest.mock import MagicMock, patch
+
 import pytest
 from decimal import Decimal
 from app_web.extension import pgdb
+from unittest.mock import MagicMock, patch
 from app_web.models.admin.producto_admin import (
     Producto,
     AltaProductoDescripcionException,
@@ -23,7 +24,7 @@ def setup_db():
 
 @pytest.mark.parametrize(
     "descripcion,precio",
-    [("Tenis deportivos", 599.99), ("Zapatos casuales", 300.00)]
+    [("Tenis deportivos", 599.99), ("Tenis casuales", 300.00)]
 )
 def test_crear_producto_valido(descripcion, precio):
     producto = Producto(descripcion=descripcion, precio=precio)
@@ -120,7 +121,7 @@ def test_insertar_detalle_producto_exitoso(setup_db):
     producto_id = Producto.insertar_producto_en_db(nombre, precio, disponible, marca, descripcion, usuario_id)
     
     # Insertar detalle con combinación única
-    talla = "XL"  # Usar una talla diferente
+    talla = "9"  # Usar una talla diferente
     color = "Verde"  # Usar un color diferente
     cantidad = 5
     
@@ -138,11 +139,11 @@ def test_insertar_detalle_producto_duplicado(setup_db):
     producto_id = Producto.insertar_producto_en_db(
         "Producto duplicado", 200.00, True, "Marca prueba", "Descripción", 1
     )
-    Producto.insertar_detalle_producto(producto_id, "L", "Azul", 5)
+    Producto.insertar_detalle_producto(producto_id, "5", "Azul", 5)
     
     # Intentamos insertar el mismo detalle nuevamente
     with pytest.raises(ProductoDetalleException) as exc_info:
-        Producto.insertar_detalle_producto(producto_id, "L", "Azul", 5)
+        Producto.insertar_detalle_producto(producto_id, "4", "Azul", 5)
     
     assert "Ya existe un detalle con esta combinación" in str(exc_info.value)
 
@@ -152,7 +153,7 @@ def test_insertar_detalle_producto_no_existente(setup_db):
     producto_id = 99999  # ID que no existe
     
     with pytest.raises(ProductoDetalleException) as exc_info:
-        Producto.insertar_detalle_producto(producto_id, "S", "Blanco", 3)
+        Producto.insertar_detalle_producto(producto_id, "5", "Blanco", 3)
     
     assert "El producto especificado no existe" in str(exc_info.value)
 
@@ -218,7 +219,7 @@ def test_actualizar_producto_no_pertenece_usuario(setup_db):
     )
     
     try:
-        # Intentar actualizar con usuario 2 (que no es el dueño)
+        # Intentar actualizar con usuario 2 
         with pytest.raises(ProductoNoEncontradoException) as exc_info:
             Producto.actualizar_producto(
                 id=producto_id,
@@ -253,7 +254,7 @@ def test_eliminar_producto_exitoso(setup_db):
         usuario_id=1
     )
     # Agregar un detalle
-    Producto.insertar_detalle_producto(producto_id, "M", "Azul", 10)
+    Producto.insertar_detalle_producto(producto_id, "8", "Azul", 10)
 
     try:
         # Eliminar el producto
@@ -291,7 +292,7 @@ def test_eliminar_producto_no_pertenece_usuario(setup_db):
     )
     
     try:
-        # Intentar eliminar con usuario 2 (que no es el dueño)
+      
         with pytest.raises(ProductoNoEncontradoException) as exc_info:
             Producto.eliminar_producto(producto_id, usuario_id=2)
         
@@ -318,15 +319,15 @@ def test_eliminar_producto_no_existente(setup_db):
 # por probar
 def test_eliminar_producto_error_generico(setup_db):
     """Prueba manejo de errores genéricos al eliminar producto"""
-    # Use patch to simulate generic error
+    
     with patch('app_web.models.admin.producto_admin.pgdb.get_cursor') as mock_cursor:
-        # Configure the mock to raise a generic error
+       
         mock_cursor.return_value.__enter__.return_value.execute.side_effect = Exception("Database error")
         
         with pytest.raises(Exception) as exc_info:
             Producto.eliminar_producto(1)
         
-        # Match the exact error message from the method
+        
         assert "Error al eliminar el producto" in str(exc_info.value)
 
 # tes para probar actualizar_detalle_producto
@@ -337,9 +338,9 @@ def test_actualizar_detalle_producto_no_existente(setup_db):
     detalle_id = 99999  # ID que no existe
     
     with pytest.raises(ProductoDetalleException) as exc_info:
-        Producto.actualizar_detalle_producto(detalle_id, "M", "Azul", 10)
+        Producto.actualizar_detalle_producto(detalle_id, "8", "Azul", 10)
     
-    # Match the actual error message from the method
+    
     assert "Error al actualizar el detalle del producto" in str(exc_info.value)
 
 
@@ -355,19 +356,19 @@ def test_actualizar_detalle_producto_exitoso(setup_db):
         usuario_id=1
     )
     # Insertar detalle y obtener su ID
-    Producto.insertar_detalle_producto(producto_id, "S", "Rojo", 5)
+    Producto.insertar_detalle_producto(producto_id, "8", "Rojo", 5)
     detalles = Producto.obtener_detalles_completos_por_id(producto_id)
     detalle_id = detalles[0]['id']  # Acceder al ID correctamente
 
     try:
         # Actualizar el detalle
-        resultado = Producto.actualizar_detalle_producto(detalle_id, "M", "Azul", 10)
+        resultado = Producto.actualizar_detalle_producto(detalle_id, "8", "Azul", 10)
         assert resultado is True
         
         # Verificar los cambios
         detalles_actualizados = Producto.obtener_detalles_completos_por_id(producto_id)
         detalle_actualizado = next(d for d in detalles_actualizados if d['id'] == detalle_id)
-        assert detalle_actualizado['talla'] == "M"
+        assert detalle_actualizado['talla'] == "8"
         assert detalle_actualizado['color'] == "Azul"
         assert detalle_actualizado['stock'] == 10
         
@@ -387,7 +388,7 @@ def test_actualizar_detalle_producto_error_generico(setup_db, mocker):
     mocker.patch('app_web.models.admin.producto_admin.pgdb.get_cursor', return_value=mock_cursor)
     
     with pytest.raises(ProductoDetalleException) as exc_info:
-        Producto.actualizar_detalle_producto(1, "M", "Azul", 10)
+        Producto.actualizar_detalle_producto(1, "8", "Azul", 10)
     
     assert "Error al actualizar el detalle del producto" in str(exc_info.value)
 
@@ -406,8 +407,8 @@ def test_actualizar_detalle_producto_duplicado(setup_db):
     )
     
     # Insertar detalles iniciales
-    Producto.insertar_detalle_producto(producto_id, "S", "Rojo", 5)
-    Producto.insertar_detalle_producto(producto_id, "M", "Azul", 3)
+    Producto.insertar_detalle_producto(producto_id, "5", "Rojo", 5)
+    Producto.insertar_detalle_producto(producto_id, "8", "Azul", 3)
     
     # Obtener IDs de los detalles
     detalles = Producto.obtener_detalles_completos_por_id(producto_id)
@@ -419,7 +420,7 @@ def test_actualizar_detalle_producto_duplicado(setup_db):
         with pytest.raises(ProductoDetalleException) as exc_info:
             Producto.actualizar_detalle_producto(
                 detalle_a_actualizar,
-                detalle_existente['talla'],  # M
+                detalle_existente['talla'],  # 
                 detalle_existente['color'],  # Azul
                 5
             )
@@ -446,7 +447,7 @@ def test_eliminar_detalle_producto_exitoso(setup_db):
         descripcion="Descripción test",
         usuario_id=1
     )
-    Producto.insertar_detalle_producto(producto_id, "S", "Rojo", 5)
+    Producto.insertar_detalle_producto(producto_id, "8", "Rojo", 5)
     detalles = Producto.obtener_detalles_completos_por_id(producto_id)
     detalle_id = detalles[0]['id']
 

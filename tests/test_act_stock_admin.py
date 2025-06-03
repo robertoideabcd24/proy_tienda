@@ -9,7 +9,7 @@ class TestActualizarStock:
     @patch('app_web.models.admin.producto_admin.pgdb.get_cursor')
     def test_actualizar_stock_detalle_no_encontrado(self, mock_cursor):
         """Prueba cuando no se encuentra el detalle del producto"""
-        # Configurar el mock para que no devuelva resultados
+    
         mock_cursor.return_value.__enter__.return_value.fetchone.return_value = None
         
         # Ejecutar la función
@@ -27,7 +27,7 @@ class TestActualizarStock:
     @patch('app_web.models.admin.producto_admin.pgdb.get_cursor')
     def test_actualizar_stock_insuficiente(self, mock_cursor):
         """Prueba cuando no hay suficiente stock"""
-        # Configurar el mock para devolver un stock bajo (3 unidades)
+       
         mock_cursor.return_value.__enter__.return_value.fetchone.return_value = (3,)
         
         # Ejecutar la función intentando restar 5 unidades
@@ -45,7 +45,7 @@ class TestActualizarStock:
     @patch('app_web.models.admin.producto_admin.pgdb.get_cursor')
     def test_actualizar_stock_error_generico(self, mock_cursor):
         """Prueba manejo de errores genéricos"""
-        # Configurar el mock para lanzar una excepción
+       
         mock_cursor.return_value.__enter__.return_value.execute.side_effect = Exception("Error de base de datos")
         
         # Ejecutar la función
@@ -63,7 +63,7 @@ class TestActualizarStock:
     @patch('app_web.models.admin.producto_admin.pgdb.get_cursor')
     def test_actualizar_stock_con_talla_numerica(self, mock_cursor):
         """Prueba que la función maneje correctamente tallas numéricas"""
-        # Configurar el mock
+       
         mock_cursor.return_value.__enter__.return_value.execute.return_value = None
         mock_cursor.return_value.__enter__.return_value.fetchone.return_value = (10,)
         
@@ -86,7 +86,7 @@ class TestActualizarStock:
     @patch('app_web.models.admin.producto_admin.pgdb.get_cursor')
     def test_actualizar_stock_con_talla_string(self, mock_cursor):
         """Prueba que la función maneje correctamente tallas como strings"""
-        # Configurar el mock
+        
         mock_cursor.return_value.__enter__.return_value.execute.return_value = None
         mock_cursor.return_value.__enter__.return_value.fetchone.return_value = (10,)
         
@@ -102,6 +102,6 @@ class TestActualizarStock:
         assert resultado is True
         assert mensaje == "Stock actualizado"
         
-        # Verificar que la talla se pasó correctamente (como string)
+      
         args, kwargs = mock_cursor.return_value.__enter__.return_value.execute.call_args
         assert args[1][2] == "10.5"  # talla en la posición 2 de los parámetros

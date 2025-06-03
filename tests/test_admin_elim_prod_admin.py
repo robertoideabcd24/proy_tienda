@@ -30,11 +30,11 @@ def test_eliminar_producto_exitoso(client, admin_session):
         assert response.status_code == 200
         assert b"Producto eliminado correctamente" in response.data
         
-        # Verificar que el producto ya no existe
+        
         with pytest.raises(ProductoNoEncontradoException):
             Producto.obtener_producto_por_id(producto_id)
     finally:
-        # Limpieza por si falla la prueba
+       
         try:
             Producto.eliminar_producto(producto_id, 1)
         except:
@@ -42,7 +42,7 @@ def test_eliminar_producto_exitoso(client, admin_session):
 
 def test_eliminar_producto_error_general(client, admin_session):
     """Prueba manejo de errores inesperados al eliminar"""
-    # Crear producto de prueba
+   
     producto_id = Producto.insertar_producto_en_db(
         nombre="Producto test error",
         precio=200.00,
@@ -169,7 +169,7 @@ def test_eliminar_producto_con_detalles(client, admin_session):
                 assert response.status_code == 200
                 messages = get_flashed_messages(with_categories=True)
                 assert len(messages) == 1
-                assert messages[0][0] == 'danger'  # Debería ser danger según tu código
+                assert messages[0][0] == 'danger' 
                 assert "No se puede eliminar, tiene detalles asociados" in messages[0][1]
         
         finally:

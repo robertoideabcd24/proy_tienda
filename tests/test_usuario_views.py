@@ -213,7 +213,7 @@ def test_agregar_carrito_con_indice_invalido(
 
     texto = response.data.decode('utf-8')
     assert response.status_code == 200
-    assert 'Selecci' in texto  # Para verificar mensaje que empieza con "Selección..."
+    assert 'Selecci' in texto  
 
 @patch('app_web.views_usuario.Producto.obtener_stock_disponible')
 @patch('app_web.views_usuario.Producto.obtener_detalles_por_id')
@@ -312,13 +312,12 @@ def test_agregar_carrito_precio(
         args, _ = mock_guardar_compra.call_args
         assert float(args[5]) == precio_esperado
     else:
-        # Ahora esperamos que igual se llame con precio 0
+       
         assert mock_guardar_compra.called
         args, _ = mock_guardar_compra.call_args
         assert float(args[5]) == 0.0
 
 
-# Añade estos tests al final de tu archivo de pruebas
 
 # -----------------------------------------------------------
 # Tests específicos para mensajes flash
@@ -494,10 +493,10 @@ def test_ver_producto_usuario(
     client,
     app
 ):
-    # Setup URL for redirect
+    
     mock_url_for.return_value = '/menu_usuario'
 
-    # Simular login y rol en sesión para bypass decorador
+   
     with client.session_transaction() as sess:
         sess['rol'] = 2
 

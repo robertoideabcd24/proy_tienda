@@ -3,6 +3,9 @@ from ..admin.producto_admin import Producto
 from decimal import Decimal
 from ..usuario.compras import Compra
 
+class CarritoError(Exception):
+    pass
+
 class Carrito:
     @staticmethod
     def obtener_por_usuario_y_producto(usuario_id, producto_id, talla, color):
@@ -22,7 +25,7 @@ class Carrito:
                     talla=item[3],
                     color=item[4],
                     cantidad=item[5],
-                    creado_en=item[6]  # ← Esto resuelve el error
+                    creado_en=item[6]  
                 )
         return None
 
@@ -55,8 +58,11 @@ class Carrito:
                 resultado = cursor.fetchone()
                 self.id = resultado[0]
                 self.creado_en = resultado[1]
+                
     @staticmethod
     def agregar_producto(usuario_id, producto_id, talla, color, cantidad):
+        if cantidad <= 0 or cantidad > 12:
+            raise CarritoError("Cantidad inválida. Debe ser entre 1 y 12.")
         try:
             # Primero verificar stock disponible considerando reservas
             stock_disponible = Producto.obtener_stock_disponible(producto_id, talla, color)
@@ -272,6 +278,7 @@ class Carrito:
                 cursor.execute(query, (usuario_id, producto_id, talla, color))
         except Exception as e:
             raise Exception(f"No se pudo eliminar el producto: {str(e)}")
+
 
     @staticmethod
     def calcular_descuento(cantidad):

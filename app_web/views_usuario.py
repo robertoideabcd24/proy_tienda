@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash, session
 from functools import wraps
 from .models.admin.producto_admin import Producto
 from .models.usuario.carrito_usuario import Carrito
-from .extension import pgdb  # tu instancia de PostgresDB
+from .extension import pgdb 
 from .models.usuario.compras import Compra
 
 
@@ -36,7 +36,7 @@ def registrar_rutas_usuario(app):
                 return redirect(url_for('comprar_producto', id=producto_id))
                 
             detalle = detalles[detalle_index]
-            talla, color, stock_fisico = detalle  # Cambiado a stock_fisico para claridad
+            talla, color, stock_fisico = detalle  
 
             campo_cantidad = f'cantidad_{detalle_index}'
             cantidad = int(request.form.get(campo_cantidad, 1))
@@ -60,15 +60,15 @@ def registrar_rutas_usuario(app):
             if accion == 'comprar':
                 # Verificar stock nuevamente por si cambió
                 stock_actual = Producto.obtener_stock_disponible(producto_id, talla, color)
-                # if cantidad > stock_actual:
-                #     flash(f"El stock cambió. Disponible ahora: {stock_actual}", "danger")
-                #     return redirect(url_for('comprar_producto', id=producto_id))
+                if cantidad > stock_actual:
+                    flash(f"El stock cambió. Disponible ahora: {stock_actual}", "danger")
+                    return redirect(url_for('comprar_producto', id=producto_id))
 
                 # Actualizar stock
                 exito, mensaje = Producto.actualizar_stock(producto_id, talla, color, cantidad)
-                # if not exito:
-                #     flash(mensaje, "danger")
-                #     return redirect(url_for('comprar_producto', id=producto_id))
+                if not exito:
+                    flash(mensaje, "danger")
+                    return redirect(url_for('comprar_producto', id=producto_id))
 
                 # Obtener precio del producto
                 producto = Producto.obtener_producto_por_id(producto_id)
@@ -86,7 +86,7 @@ def registrar_rutas_usuario(app):
                 return redirect(url_for('comprar_producto', id=producto_id))
             
             else:
-                # Agregar el producto al carrito con validación de stock
+               
                 exito_agregar, mensaje_agregar = Carrito.agregar_producto(
                     usuario_id, producto_id, talla, color, cantidad
                 )
@@ -97,8 +97,8 @@ def registrar_rutas_usuario(app):
                     flash("Producto agregado al carrito", "success")
                 return redirect(url_for('comprar_producto', id=producto_id))
 
-        # except ValueError:
-        #     flash("Cantidad inválida", "danger")
+        except ValueError:
+            flash("Cantidad inválida", "danger")
         except Exception as e:
             flash(f"Error: {str(e)}", "danger")
 
@@ -120,7 +120,7 @@ def registrar_rutas_usuario(app):
         
 
     @app.route('/ver_carrito')
-    @rol_requerido(2)  # Añade el decorador para requerir rol de usuario
+    @rol_requerido(2)  
     def ver_carrito():
         try:
             
@@ -132,7 +132,7 @@ def registrar_rutas_usuario(app):
             # Calcular el total
             total = sum(item['subtotal'] for item in carrito)
             
-            # Renderizar la plantilla con los datos
+            
             return render_template('usuario/ver_carrito.html', 
                                 carrito=carrito, 
                                 total=total)
@@ -153,7 +153,7 @@ def registrar_rutas_usuario(app):
             if exito:
                 flash(mensaje, "success")
             else:
-                # El mensaje ya contiene toda la información necesaria
+             
                 flash(mensaje, "warning" if "parcial" in mensaje.lower() else "danger")
             
             return redirect(url_for('ver_carrito'))
@@ -185,5 +185,5 @@ def registrar_rutas_usuario(app):
     def ver_compras():
         usuario_id = session.get('usuario_id')
         
-        compras = Compra.obtener_compras_usuario(usuario_id)  # <- Este método debes tenerlo definido
+        compras = Compra.obtener_compras_usuario(usuario_id)  
         return render_template('usuario/ver_compras.html', compras=compras)

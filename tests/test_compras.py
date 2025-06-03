@@ -7,7 +7,7 @@ from app_web.models.admin.producto_admin import AltaProductoPrecioException
 from app_web.models.usuario.carrito_usuario import Carrito
 from decimal import Decimal
 
-# Test obtener_compras_usuario - éxito
+# Test obtener_compras_usuario 
 @patch("app_web.models.usuario.compras.pgdb")
 def test_obtener_compras_usuario_exito(mock_pgdb):
     cursor_mock = mock_pgdb.get_cursor.return_value.__enter__.return_value
@@ -23,7 +23,7 @@ def test_obtener_compras_usuario_exito(mock_pgdb):
     assert compras[0]['precio_original'] == 100.0
     assert compras[0]['precio_final'] == 90.0
 
-# Test obtener_compras_usuario - excepción retorna lista vacía
+# Test obtener_compras_usuario
 @patch("app_web.models.usuario.compras.pgdb")
 def test_obtener_compras_usuario_error(mock_pgdb):
     mock_pgdb.get_cursor.side_effect = Exception("DB error")
@@ -31,7 +31,7 @@ def test_obtener_compras_usuario_error(mock_pgdb):
     compras = Compra.obtener_compras_usuario(1)
     assert compras == []
 
-# Test guardar_compra - éxito con distintos descuentos
+# Test guardar_compra 
 @patch("app_web.models.usuario.compras.pgdb")
 def test_guardar_compra_exito(mock_pgdb):
     cursor_mock = mock_pgdb.get_cursor.return_value.__enter__.return_value
@@ -55,7 +55,7 @@ def test_guardar_compra_exito(mock_pgdb):
     exito, _ = Compra.guardar_compra(1, 10, "M", "Rojo", 1, '100')
     assert exito is True
 
-# Test guardar_compra - excepción
+# Test guardar_compra 
 @patch("app_web.models.usuario.compras.pgdb")
 def test_guardar_compra_error(mock_pgdb):
     mock_pgdb.get_cursor.side_effect = Exception("DB error")
@@ -63,14 +63,14 @@ def test_guardar_compra_error(mock_pgdb):
     assert exito is False
     assert "DB error" in mensaje
 
-# Test eliminar_compras_usuario - éxito
+# Test eliminar_compras_usuario
 @patch("app_web.models.usuario.compras.pgdb")
 def test_eliminar_compras_usuario_exito(mock_pgdb):
     cursor_mock = mock_pgdb.get_cursor.return_value.__enter__.return_value
     Compra.eliminar_compras_usuario(1)
     assert cursor_mock.execute.call_count == 2
 
-# Test eliminar_compras_usuario - excepción (solo imprime error)
+# Test eliminar_compras_usuario 
 @patch("app_web.models.usuario.compras.pgdb")
 def test_eliminar_compras_usuario_error(mock_pgdb):
     mock_pgdb.get_cursor.side_effect = Exception("DB error")
@@ -103,12 +103,12 @@ def test_procesar_pago_compra_parcial(mock_actualizar_stock, mock_obtener_stock_
 
     exito, mensaje = Carrito.procesar_pago(1)
 
-    # Debe ser False porque hay productos sin stock / errores
+    
     assert exito is False
     assert "Compra parcial realizada" in mensaje
-    assert "Producto1" in mensaje or "Producto2" in mensaje  # Al menos uno de los productos aparece en el mensaje de error
+    assert "Producto1" in mensaje or "Producto2" in mensaje 
 
-    # Verifica que se hizo DELETE solo para productos comprados (id=1)
+   
     cursor_mock.execute.assert_any_call("DELETE FROM carrito WHERE id IN %s", ((1,),))
 
 

@@ -1,15 +1,15 @@
 import pytest
 from app_web.models.admin.usuario_admin import Usuario, UsuarioException
-from app_web.extension import pgdb  # Asegúrate de importar pgdb
+from app_web.extension import pgdb  
 
-# Fixture para datos de prueba
+
 @pytest.fixture
 def usuario_valido():
     return ("TestUser", "1990-01-01", "user", "test@example.com", "testpass123")
 
-# Tests para validaciones - Sin interactuar con DB real
+
 @pytest.mark.parametrize("nombre,fecha_nacimiento,rol,correo,contrasena,expected_error", [
-   # ("Ana", "1995-08-10", "user", "ana@example.com", "securepass", None),
+   
     (None, "1995-08-10", "user", "ana@example.com", "securepass", "Todos los campos son obligatorios"),
     ("Ana", None, "user", "ana@example.com", "securepass", "Todos los campos son obligatorios"),
     ("", "1995-08-10", "user", "ana@example.com", "securepass", "Todos los campos son obligatorios"),
@@ -22,7 +22,7 @@ def test_validaciones_insertar_usuario(nombre, fecha_nacimiento, rol, correo, co
             Usuario.insertar_usuario_en_db(nombre, fecha_nacimiento, rol, correo, contrasena)
         assert expected_error in str(excinfo.value)
     else:
-        # Solo verifica que no lance excepción
+
         try:
             Usuario.insertar_usuario_en_db(nombre, fecha_nacimiento, rol, correo, contrasena)
         except UsuarioException:
@@ -30,7 +30,6 @@ def test_validaciones_insertar_usuario(nombre, fecha_nacimiento, rol, correo, co
 
 
 
-# Tests para verificar_usuario - Solo validaciones de entrada
 @pytest.mark.parametrize("username,password,expected_exception", [
     ("valid", "valid", None),
     ("", "valid", "Nombre de usuario y contraseña son obligatorios."),
@@ -44,14 +43,13 @@ def test_verificar_usuario_validaciones(username, password, expected_exception):
             Usuario.verificar_usuario(username, password)
         assert expected_exception in str(excinfo.value)
     else:
-        # Solo probamos que no lanza excepción con datos válidos
-        # La interacción con la DB no se prueba aquí
+
         try:
             Usuario.verificar_usuario(username, password)
         except UsuarioException:
             pytest.fail("No debería lanzar excepción con datos válidos")
 
-# Tests para insertar_usuario_en_db - Solo validaciones
+
 @pytest.mark.parametrize("nombre,fecha_nacimiento,rol,correo,contrasena,expected_exception", [
     ("Ana", "1995-08-10", "user", "ana@example.com", "securepass", None),
     (None, "1995-08-10", "user", "ana@example.com", "securepass", "Todos los campos son obligatorios"),

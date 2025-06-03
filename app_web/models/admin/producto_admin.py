@@ -11,7 +11,8 @@ class ProductoDetalleException(Exception): pass
 class AltaProductoDescripcionException(AltaProductoException): pass
 
 class Producto:
-    def __init__(self, descripcion=None, precio=None, id=None):
+    
+    def __init__(self, descripcion=None, precio=None, id=None, nombre= None):
         if descripcion is None or not isinstance(descripcion, str) or descripcion.strip() == "":
             raise AltaProductoDescripcionException("Error: la descripción del producto no puede estar vacía o ser inválida")
 
@@ -26,6 +27,12 @@ class Producto:
         
         if precio > 9999999999:
             raise AltaProductoPrecioException("Error: el precio es demasiado grande")
+        
+        if len(nombre) > 50:
+            raise AltaProductoDescripcionException("Error: el nombre no puede exceder los 50 caracteres")
+        
+        if not nombre or len(nombre.strip()) == 0:
+            raise AltaProductoDescripcionException("Error: el nombre no puede estar vacío")
 
         self.id = id
         self.descripcion = descripcion
@@ -368,7 +375,7 @@ class Producto:
 
 
     @staticmethod
-    def obtener_producto_por_nombre(nombre):  # Elimina el 'cls' de los parámetros
+    def obtener_producto_por_nombre(nombre):  
         try:
             with pgdb.get_cursor() as cursor:
                 cursor.execute("""
@@ -389,3 +396,4 @@ class Producto:
         except Exception as e:
             print(f"Error al obtener producto por nombre: {str(e)}")
             return None
+        
