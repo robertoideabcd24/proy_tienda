@@ -61,8 +61,8 @@ class Carrito:
                 
     @staticmethod
     def agregar_producto(usuario_id, producto_id, talla, color, cantidad):
-        if cantidad <= 0 or cantidad > 12:
-            raise CarritoError("Cantidad inválida. Debe ser entre 1 y 12.")
+        if cantidad <= 0 or cantidad > 50:
+            raise CarritoError("Cantidad inválida. Debe ser entre 1 y 50.")
         try:
             # Primero verificar stock disponible considerando reservas
             stock_disponible = Producto.obtener_stock_disponible(producto_id, talla, color)
